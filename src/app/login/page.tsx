@@ -3,10 +3,11 @@ import { MdEmail } from "react-icons/md";
 import { IoIosLock } from "react-icons/io";
 import { FaMinus } from "react-icons/fa6";
 // import { FaGoogle } from "react-icons/fa";
-import { FaFacebookF } from "react-icons/fa";
+// import { FaFacebookF } from "react-icons/fa";
 // import { FaTwitter } from "react-icons/fa";
 import GoogleIcon from "@/assets/googleIcon";
 import TwitterIcon from "@/assets/twitterIcon";
+import FacebookIcon from "@/assets/facebookIcon";
 
 export default function LoginPage() {
   return (
@@ -68,7 +69,8 @@ export default function LoginPage() {
           <GoogleIcon size={30} />
         </div>
         <div className="border-1 p-4 rounded-lg border-[#35F9D1]">
-          <FaFacebookF className="text-[#35F9D1]" />
+          {/* <FaFacebookF className="text-[#35F9D1]" /> */}
+          <FacebookIcon size={30} />
         </div>
         <div className="border-1 p-4 rounded-lg border-[#35F9D1]">
           {/* <FaTwitter className="text-[#35F9D1]" /> */}

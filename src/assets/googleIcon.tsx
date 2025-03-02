@@ -3,7 +3,7 @@ interface IProps {
 }
 
 import * as React from "react";
-const SvgComponent = ({ size }: IProps) => (
+const GoogleIcon = ({ size }: IProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -29,4 +29,4 @@ const SvgComponent = ({ size }: IProps) => (
     />
   </svg>
 );
-export default SvgComponent;
+export default GoogleIcon;
