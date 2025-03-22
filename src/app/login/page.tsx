@@ -1,60 +1,102 @@
-import React from "react";
+"use client";
+
 import { MdEmail } from "react-icons/md";
 import { IoIosLock } from "react-icons/io";
 import { FaMinus } from "react-icons/fa6";
-// import { FaGoogle } from "react-icons/fa";
-// import { FaFacebookF } from "react-icons/fa";
-// import { FaTwitter } from "react-icons/fa";
 import GoogleIcon from "@/assets/googleIcon";
 import TwitterIcon from "@/assets/twitterIcon";
 import FacebookIcon from "@/assets/facebookIcon";
+import { useForm } from "react-hook-form";
+import InputForm from "@/components/InputForm";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const LoginSchema = z.object({
+  email: z.string().email("Email salah"),
+  password: z.string().min(12, "Password Minimal 12 Karakter"),
+});
+
+type LoginSchemaType = z.infer<typeof LoginSchema>;
 
 export default function LoginPage() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(LoginSchema),
+  });
+
+  const handleForm = (data: LoginSchemaType) => {
+    console.log("Email:", data.email);
+    console.log("password:", data.password);
+    alert("Berhasil submit");
+  };
+
+  console.log("Error", errors);
+
   return (
     <div className="px-10">
       <div className="pt-20 text-center pb-15">
-        <h1 className="text-4xl font-semibold text-[#35F9D1]">TRANSME</h1>
-        <p>PASSENGER BUS</p>
+        <h1 className="text-4xl font-semibold text-[#35F9D1] pb-2">Trans-nyaBli</h1>
+        <p>CUSTOMER</p>
       </div>
 
       {/* Input */}
-      <div className="pb-5">
-        <h1 className="text-center pb-5">Login to your account</h1>
+      <form onSubmit={handleSubmit(handleForm)}>
+        <div className="pb-5">
+          <h1 className="text-center pb-5">Login to your account</h1>
 
-        {/* Input Email */}
-        <div className="flex items-center pb-5">
-          <div className="bg-[#35F9D1] py-3.5 px-4 rounded-l-xl border-1 border-[#35F9D1]">
-            <MdEmail className="text-[#1A443B] text-xl" />
+          {/* Input Email */}
+          <div className="pb-5">
+            <InputForm
+              {...register("email", {
+                required: {
+                  message: "Email Kosong",
+                  value: true,
+                },
+              })}
+              title="Email"
+              className="py-3.5 px-4"
+              error={errors?.email?.message}
+              logo={<MdEmail className="text-[#1A443B] text-xl" />}
+            />
           </div>
-          <input
-            placeholder="Email"
-            className="border-1 rounded-r-xl w-full py-3 px-5 border-[#4D4D4D]"
-          />
-        </div>
 
-        {/* Input Password */}
-        <div className="flex items-center pb-3">
-          <div className="bg-[#35F9D1] py-3 px-3.5 rounded-l-xl border-1 border-[#35F9D1]">
-            <IoIosLock className="text-[#1A443B] text-2xl" />
+          {/* Input Password */}
+          <div className="pb-3">
+            <InputForm
+              title="Password"
+              logo={<IoIosLock className="text-[#1A443B] text-2xl" />}
+              className="py-3 px-3.5"
+              {...register("password", {
+                required: {
+                  message: "Password Kosong",
+                  value: true,
+                },
+              })}
+              error={errors?.password?.message}
+            />
           </div>
-          <input
-            placeholder="Password"
-            className="border-1 rounded-r-xl w-full py-3 px-5 border-[#4D4D4D]"
-          />
+
+          {/* Forgot password */}
+          <div className="text-end">
+            <button type="button" className="text-sm text-[#35F9D1]">
+              Forgot password?
+            </button>
+          </div>
         </div>
 
-        {/* Forgot password */}
-        <div className="text-end">
-          <button className="text-sm text-[#35F9D1]">Forgot password?</button>
+        {/* Button Login */}
+        <div className="pb-10">
+          <button
+            type="submit"
+            className="w-full bg-[#35F9D1] font-semibold text-[#1A443B] py-3 rounded-xl"
+          >
+            Login
+          </button>
         </div>
-      </div>
-
-      {/* Button Login */}
-      <div className="pb-10">
-        <button className="w-full bg-[#35F9D1] font-semibold text-[#1A443B] py-3 rounded-xl">
-          Login
-        </button>
-      </div>
+      </form>
 
       <div className="flex justify-center gap-x-3 items-center pb-5 text-sm">
         <FaMinus className="text-[#35F9D1]" />
@@ -65,15 +107,12 @@ export default function LoginPage() {
       {/* Logo sosmed */}
       <div className="flex justify-center items-center gap-x-10 text-3xl pb-5">
         <div className="border-1 p-4 rounded-lg border-[#35F9D1]">
-          {/* <FaGoogle className="text-[#35F9D1]" /> */}
           <GoogleIcon size={30} />
         </div>
         <div className="border-1 p-4 rounded-lg border-[#35F9D1]">
-          {/* <FaFacebookF className="text-[#35F9D1]" /> */}
           <FacebookIcon size={30} />
         </div>
         <div className="border-1 p-4 rounded-lg border-[#35F9D1]">
-          {/* <FaTwitter className="text-[#35F9D1]" /> */}
           <TwitterIcon size={30} />
         </div>
       </div>
