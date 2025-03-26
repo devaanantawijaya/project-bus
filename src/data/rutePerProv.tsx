@@ -16,7 +16,7 @@ interface IRute {
   };
 }
 
-interface IProvinsi {
+export interface IProvinsi {
   namaProvinsi: string;
   rute: IRute[];
 }

@@ -11,26 +11,47 @@ import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
 import { RutePerProvinsi } from "@/data/rutePerProv";
-import Map from "@/components/Map";
 import UseUserLocation from "@/hook/useUserLocation";
-import { TbArrowZigZag } from "react-icons/tb";
 import UseGetProvince from "@/hook/useGetProvince";
+import UseMap from "@/hook/useMap";
+import { useForm } from "react-hook-form";
+
+interface IBookingBus {
+  rute: string;
+}
 
 export default function BusPage() {
+  const [navigasi, setNavigasi] = useState<
+    "Rute" | "Jemput" | "Tujuan" | "Bus" | null
+  >("Rute");
   const [isOpenRute, setIsOpenRute] = useState(false);
   const [isOpenDetailRute, setOpenDetailRute] = useState<"A" | "B" | null>(
     null
   );
   const [pagRute, setPagRute] = useState<number>(0);
   const { userLocation } = UseUserLocation();
-  const [triggerFocusUser, setTriggerFocusUser] = useState(true);
   const { province } = UseGetProvince();
-  const [prov, setProv] = useState("");
+  const [prov, setProv] = useState<"Bali" | "Jawa Timur" | undefined>(
+    undefined
+  );
 
-  console.log("prov: ", prov);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<IBookingBus>();
+
+  const selectedRute = watch("rute");
+
+  const handleBooking = (data: IBookingBus) => {
+    console.log("Rute: ", data.rute);
+  };
 
   const handleOpenRute = () => {
     setIsOpenRute(!isOpenRute);
+    setValue("rute", "");
   };
 
   const handleOpenDetailRute = (detailRute: "A" | "B") => {
@@ -38,15 +59,21 @@ export default function BusPage() {
   };
 
   useEffect(() => {
-    if (triggerFocusUser) setProv(province);
-  }, [province, triggerFocusUser]);
+    setProv(province);
+  }, [province]);
 
-  const mencariPronvinsi = RutePerProvinsi.find(
-    (provinsi) => provinsi?.namaProvinsi?.toLocaleLowerCase() === "bali" // bali nya hanya sample
+  const cariProv = RutePerProvinsi.find(
+    (provinsi) => provinsi?.namaProvinsi?.toLocaleLowerCase() === "bali"
   );
 
-  const ruteForUser = mencariPronvinsi?.rute;
-  console.log("ruteUser: ", ruteForUser);
+  const ruteForUser = cariProv?.rute;
+
+  const { ChangeRute, userFocus } = UseMap({
+    from: ruteForUser ? ruteForUser[pagRute].from : { lat: 0, lng: 0 },
+    to: ruteForUser ? ruteForUser[pagRute].to : { lat: 0, lng: 0 },
+    center: ruteForUser ? ruteForUser[pagRute].center : { lat: 0, lng: 0 },
+    userLocation: userLocation || { lat: 0, lng: 0 },
+  });
 
   return (
     <div className="relative w-full">
@@ -56,163 +83,239 @@ export default function BusPage() {
         {/* Back Home, Fokus Rute, User Location */}
         <div className="flex justify-between items-center mb-5 mx-5">
           {/* Back Home*/}
-          <Link
-            href="/"
-            className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
-          >
-            <FaArrowLeft className="text-4xl" />
-          </Link>
+          {navigasi === "Rute" && (
+            <Link
+              href="/"
+              className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
+            >
+              <FaArrowLeft className="text-4xl" />
+            </Link>
+          )}
+          {navigasi === "Jemput" && (
+            <button
+              className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
+              onClick={() => {
+                setIsOpenRute(false)
+                setNavigasi("Rute");
+              }}
+            >
+              <FaArrowLeft className="text-4xl" />
+            </button>
+          )}
 
           <button
             className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
             onClick={() => {
-              setTriggerFocusUser(false);
+              userFocus();
             }}
           >
             <BiTargetLock className="text-4xl" />
           </button>
         </div>
 
-        {/* Pilih Rute */}
-        <div
+        {/* Isi Rute, Titik Jemput, Titik Tujuan, Pilih Bus */}
+        <form
           className={` bg-[#121418] p-5 rounded-t-3xl transition-all duration-300 ${
             isOpenRute ? `h-[470px]` : "h-36"
           }`}
+          onSubmit={handleSubmit(handleBooking)}
         >
-          {/* Button Pilih Rute */}
-          <div>
-            <h1 className="text-center text-xl mb-5">PILIH RUTE</h1>
-            <div
-              className={`${
-                isOpenRute ? "hidden" : "block"
-              } flex justify-between items-center gap-x-2`}
-            >
-              {/* Prev */}
-              <button
-                className="bg-[#07362D] py-2 rounded-lg"
-                onClick={() => {
-                  setPagRute(
-                    pagRute > 0 ? pagRute - 1 : ruteForUser.length - 1
-                  );
-                  setTriggerFocusUser(false);
-                }}
-              >
-                <IoIosArrowBack className="text-[#35F9D1] text-4xl" />
-              </button>
-              {/* Open Detail Rute */}
-              <button
-                className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-lg`}
-                onClick={handleOpenRute}
-              >
-                <div>{ruteForUser?.[pagRute].namaRute}</div>
-              </button>
-              {/* Next */}
-              <button
-                className="bg-[#07362D] py-2 rounded-lg"
-                onClick={() => {
-                  setPagRute(
-                    pagRute < ruteForUser.length - 1 ? pagRute + 1 : 0
-                  );
-                  setTriggerFocusUser(false);
-                }}
-              >
-                <IoIosArrowForward className="text-[#35F9D1] text-4xl" />
-              </button>
-            </div>
-          </div>
-
-          {/* Isi List Pilihan Rute */}
-          <div className={`${isOpenRute ? "block" : "hidden"}`}>
-            <div className="flex justify-between items-center pb-5">
-              <div className="flex justify-end">
-                <MdCancelPresentation className="text-3xl text-[#121418]" />
-              </div>
-              <h1 className="text-xl font-bold text-right">
-                {ruteForUser[pagRute].namaRute}
-              </h1>
-              <button className="flex justify-end" onClick={handleOpenRute}>
-                <MdCancelPresentation className="text-3xl" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto max-h-[260px]">
-              <div className="pb-5">
-                <button
-                  className={`bg-[#07362D] text-[#35F9D1] w-full py-3 font-bold text-xl rounded-xl`}
+          {/* Form Rute */}
+          {navigasi === "Rute" && (
+            <div>
+              {/* Pilih Rute */}
+              <div>
+                <h1
+                  className={`${
+                    isOpenRute ? "hidden" : "block"
+                  } text-center text-xl mb-5`}
                 >
-                  {`${ruteForUser[pagRute].from.loc} ⇨ ${ruteForUser[pagRute].to.loc}`}
-                </button>
-                <div className="flex items-center gap-x-1">
-                  <button
-                    className="my-2"
-                    onClick={() => handleOpenDetailRute("A")}
-                  >
-                    Detail Rute
-                  </button>
-                  {isOpenDetailRute === "A" ? (
-                    <IoMdArrowDropdown className="text-3xl" />
-                  ) : (
-                    <IoMdArrowDropup className="text-3xl" />
-                  )}
-                </div>
-                {isOpenDetailRute === "A" && (
-                  <p
-                    className={`bg-[#434343] text-center p-3 rounded-xl`}
-                  >{`GIlimanuk => Negara => Mendoyo => Pekutatan => Tabanan => Badung => Denpasar`}</p>
-                )}
-              </div>
-              <div className="pb-5">
-                <button
-                  className={`bg-[#07362D] text-[#35F9D1] w-full py-3 font-bold text-xl rounded-xl`}
+                  PILIH RUTE
+                </h1>
+                <div
+                  className={`${
+                    isOpenRute ? "hidden" : "block"
+                  } flex justify-between items-center gap-x-2`}
                 >
-                  {`${ruteForUser[pagRute].to.loc} ⇨ ${ruteForUser[pagRute].from.loc}`}
-                </button>
-                <div className="flex items-center gap-x-1">
+                  {/* Prev */}
                   <button
-                    className="my-2"
-                    onClick={() => handleOpenDetailRute("B")}
+                    type="button"
+                    className="bg-[#07362D] py-2 rounded-lg"
+                    onClick={() => {
+                      if (!ruteForUser) return;
+
+                      const idx =
+                        pagRute > 0 ? pagRute - 1 : ruteForUser.length - 1;
+
+                      setPagRute(idx);
+
+                      ChangeRute({
+                        from: ruteForUser[idx].from,
+                        to: ruteForUser[idx].to,
+                        center: ruteForUser[idx].center,
+                      });
+                    }}
                   >
-                    Detail Rute
+                    <IoIosArrowBack className="text-[#35F9D1] text-4xl" />
                   </button>
-                  {isOpenDetailRute === "B" ? (
-                    <IoMdArrowDropdown className="text-3xl" />
-                  ) : (
-                    <IoMdArrowDropup className="text-3xl" />
-                  )}
+                  {/* Open Detail Rute */}
+                  <button
+                    type="button"
+                    className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-lg`}
+                    onClick={handleOpenRute}
+                  >
+                    <div>{ruteForUser?.[pagRute]?.namaRute}</div>
+                  </button>
+                  {/* Next */}
+                  <button
+                    type="button"
+                    className="bg-[#07362D] py-2 rounded-lg"
+                    onClick={() => {
+                      if (!ruteForUser) return;
+
+                      const idx =
+                        pagRute < ruteForUser.length - 1 ? pagRute + 1 : 0;
+
+                      setPagRute(idx);
+
+                      ChangeRute({
+                        from: ruteForUser[idx].from,
+                        to: ruteForUser[idx].to,
+                        center: ruteForUser[idx].center,
+                      });
+                    }}
+                  >
+                    <IoIosArrowForward className="text-[#35F9D1] text-4xl" />
+                  </button>
                 </div>
-                {isOpenDetailRute === "B" && (
-                  <p
-                    className={`bg-[#434343] text-center p-3 rounded-xl`}
-                  >{`GIlimanuk => Negara => Mendoyo => Pekutatan => Tabanan => Badung => Denpasar`}</p>
-                )}
+              </div>
+
+              {/* Isi Pilih Rute */}
+              <div className={`${isOpenRute ? "block" : "hidden"}`}>
+                <div className="flex justify-between items-start pb-5">
+                  <div className="flex justify-end">
+                    <MdCancelPresentation className="text-3xl text-[#121418]" />
+                  </div>
+                  <div>
+                    <h1 className="text-center text-xl mb-2">PILIH RUTE</h1>
+                    <h1 className="text-xl font-bold">
+                      {ruteForUser ? ruteForUser[pagRute].namaRute : ""}
+                    </h1>
+                  </div>
+                  {/* CLose */}
+                  <button
+                    type="button"
+                    className="flex justify-end"
+                    onClick={handleOpenRute}
+                  >
+                    <MdCancelPresentation className="text-3xl" />
+                  </button>
+                </div>
+                <div className="overflow-y-auto max-h-[260px]">
+                  {[
+                    `${ruteForUser?.[pagRute]?.from?.loc || ""} ⇨ ${
+                      ruteForUser?.[pagRute]?.to?.loc || ""
+                    }`,
+                    `${ruteForUser?.[pagRute]?.to?.loc || ""} ⇨ ${
+                      ruteForUser?.[pagRute]?.from?.loc || ""
+                    }`,
+                  ].map((namaRute) => (
+                    <div key={namaRute} className="pb-5">
+                      <div
+                        className={`bg-[#07362D] ${
+                          selectedRute === namaRute ? "text-[#35F9D1]" : ""
+                        } w-full py-3 font-bold text-xl rounded-xl text-center`}
+                        onClick={() => {
+                          setValue("rute", namaRute);
+                        }}
+                      >
+                        {namaRute}
+                      </div>
+                      <div className="flex items-center gap-x-1">
+                        <button
+                          className="my-2"
+                          onClick={() => handleOpenDetailRute("A")}
+                        >
+                          Detail Rute
+                        </button>
+                        {isOpenDetailRute === "A" ? (
+                          <IoMdArrowDropdown className="text-3xl" />
+                        ) : (
+                          <IoMdArrowDropup className="text-3xl" />
+                        )}
+                      </div>
+                      {isOpenDetailRute === "A" && (
+                        <p
+                          className={`bg-[#434343] text-center p-3 rounded-xl`}
+                        >{`GIlimanuk => Negara => Mendoyo => Pekutatan => Tabanan => Badung => Denpasar`}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                      selectedRute ? "bg-[#35F9D1] font-bold" : "bg-[#25b498]"
+                    }`}
+                    disabled={!selectedRute}
+                    onClick={() => {
+                      setIsOpenRute(false);
+                      setNavigasi("Jemput");
+                    }}
+                  >
+                    LANJUT
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="mt-3">
-              <button
-                className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-3xl`}
-              >
-                LANJUT
-              </button>
+          )}
+
+          {/* Form Jemput */}
+          {navigasi === "Jemput" && (
+            <div>
+              {/* Pilih jemput */}
+              <div>
+                <h1
+                  className={`${
+                    isOpenRute ? "hidden" : "block"
+                  } text-center text-xl mb-5`}
+                >
+                  PILIH TITIK PENJEMPUTAN
+                </h1>
+                <div
+                  className={`${
+                    isOpenRute ? "hidden" : "block"
+                  } flex justify-between items-center gap-x-2`}
+                >
+                  {/* Cari Titik Jemput */}
+                  <button
+                    type="button"
+                    className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-lg`}
+                    onClick={handleOpenRute}
+                  >
+                    TITIK JEMPUT
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+          {/* Form Tujuan */}
+          {/* Form Bus */}
+        </form>
       </div>
 
-      <Map
-        from={{
-          lat: ruteForUser[pagRute].from.lat,
-          lng: ruteForUser[pagRute].from.lng,
+      {/* Tampilkan Map */}
+      <div
+        id="map"
+        style={{
+          width: "100%",
+          height: "100vh",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: -1,
         }}
-        to={{
-          lat: ruteForUser[pagRute].to.lat,
-          lng: ruteForUser[pagRute].to.lng,
-        }}
-        center={{
-          lat: ruteForUser[pagRute].center.lat,
-          lng: ruteForUser[pagRute].center.lng,
-        }}
-        userLocation={userLocation}
-        triggerFocus={triggerFocusUser}
       />
     </div>
   );

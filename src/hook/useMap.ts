@@ -4,28 +4,39 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
-interface IMaps {
+interface IUseMaps {
   center: { lat: number; lng: number };
   from: { lat: number; lng: number };
   to: { lat: number; lng: number };
-  userLocation: { lat: number; lng: number } | null;
-  triggerFocus: boolean;
-  isMove: boolean;
-  setIsMove: (isMove: boolean) => void;
+  userLocation: { lat: number; lng: number };
 }
 
-const Map = ({
-  center,
-  from,
-  to,
-  userLocation,
-  triggerFocus,
-  isMove,
-  setIsMove,
-}: IMaps) => {
+export default function UseMap({ center, from, to, userLocation }: IUseMaps) {
   const mapRef = useRef<L.Map | null>(null);
   const routingRef = useRef<L.Routing.Control | null>(null);
-  const markerRef = useRef<L.Marker | null>(null); // Marker untuk userLocation
+  const markerRef = useRef<L.Marker | null>(null);
+
+  const ChangeRute = ({
+    from,
+    to,
+    center,
+  }: {
+    from: { lat: number; lng: number };
+    to: { lat: number; lng: number };
+    center: { lat: number; lng: number };
+  }) => {
+    if (routingRef.current) {
+      routingRef.current.setWaypoints([
+        L.latLng(from.lat, from.lng),
+        L.latLng(to.lat, to.lng),
+      ]);
+    }
+    mapRef.current?.setView([center.lat, center.lng], 10);
+  };
+
+  const userFocus = () => {
+    mapRef.current?.setView([userLocation?.lat, userLocation?.lng], 11);
+  };
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -33,10 +44,6 @@ const Map = ({
       mapRef.current = L.map("map", {
         center: [center.lat, center.lng],
         zoom: 10,
-      });
-
-      mapRef.current.on("moveend", () => {
-        setIsMove(true);
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -54,16 +61,6 @@ const Map = ({
       }).addTo(mapRef.current);
     }
   }, []);
-
-  // 🔹 Update rute jika from/to berubah
-  useEffect(() => {
-    if (routingRef.current && !isMove) {
-      routingRef.current.setWaypoints([
-        L.latLng(from.lat, from.lng),
-        L.latLng(to.lat, to.lng),
-      ]);
-    }
-  }, [from, to, isMove]);
 
   // 🔹 Tambahkan atau update marker untuk lokasi user
   useEffect(() => {
@@ -84,37 +81,5 @@ const Map = ({
     }
   }, [userLocation]);
 
-  // 🔥 Fokus ke center atau userLocation dalam satu useEffect
-  useEffect(() => {
-    if (!mapRef.current) return;
-
-    // 🚀 Pastikan ukuran peta valid di mobile
-    mapRef.current.invalidateSize();
-
-    setTimeout(() => {
-      if (triggerFocus && userLocation && !isMove) {
-        console.log("Fokus ke userLocation:", userLocation);
-        mapRef.current?.setView([userLocation.lat, userLocation.lng], 11);
-      } else if (!triggerFocus) {
-        console.log("Fokus ke center:", center);
-        mapRef.current?.setView([center.lat, center.lng], 10);
-      }
-    }, 300);
-  }, [center, triggerFocus, userLocation, isMove]);
-
-  return (
-    <div
-      id="map"
-      style={{
-        width: "100%",
-        height: "100vh",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        zIndex: -1,
-      }}
-    />
-  );
-};
-
-export default Map;
+  return { ChangeRute, userFocus };
+}

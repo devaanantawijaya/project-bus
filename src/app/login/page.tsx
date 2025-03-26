@@ -38,7 +38,7 @@ export default function LoginPage() {
   return (
     <div className="px-10">
       <div className="pt-20 text-center pb-15">
-        <h1 className="text-4xl font-semibold text-[#35F9D1] pb-2">Trans-nyaBli</h1>
+        <h1 className="text-4xl font-semibold text-[#35F9D1] pb-2">TransBli</h1>
         <p>CUSTOMER</p>
       </div>
 

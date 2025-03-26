@@ -1,7 +1,7 @@
 import React from "react";
 
 interface IProv {
-  prov: string | null;
+  prov: string;
   setProv: React.Dispatch<React.SetStateAction<string>>;
 }
 
