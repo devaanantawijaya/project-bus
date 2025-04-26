@@ -1,0 +1,127 @@
+{
+  "data": [
+    {
+      "nama_bus": "Bahagia",
+      "bus": [
+        {
+          "platNomor": "DK 1111 WA",
+          "rute": "GILIMANUK ⇄ DENPASAR",
+          "koordinat": { "lat": -8.391088, "lng": 114.751154 },
+          "keberangkatan": [
+            {
+              "IsiRute": "GILIMANUK ⇨ DENPASAR",
+              "start": "07.00",
+              "finish": "10.00",
+              "otw": true,
+              "booking": false
+            },
+            {
+              "IsiRute": "DENPASAR ⇨ GILIMANUK",
+              "start": "12.00",
+              "finish": "15.00",
+              "otw": false,
+              "booking": true
+            }
+          ],
+          "tarifPerKM": 400
+        },
+        {
+          "platNomor": "DK 2222 WA",
+          "rute": "GILIMANUK ⇄ DENPASAR",
+          "koordinat": { "lat": -8.391088, "lng": 114.751154 },
+          "keberangkatan": [
+            {
+              "IsiRute": "GILIMANUK ⇨ DENPASAR",
+              "start": "06.30",
+              "finish": "09.30",
+              "otw": true,
+              "booking": false
+            },
+            {
+              "IsiRute": "DENPASAR ⇨ GILIMANUK",
+              "start": "11.30",
+              "finish": "14.30",
+              "otw": false,
+              "booking": true
+            }
+          ],
+          "tarifPerKM": 400
+        },
+        {
+          "platNomor": "DK 3333 WA",
+          "rute": "GILIMANUK ⇄ DENPASAR",
+          "koordinat": { "lat": -8.397547, "lng": 114.763719 },
+          "keberangkatan": [
+            {
+              "IsiRute": "GILIMANUK ⇨ DENPASAR",
+              "start": "06.00",
+              "finish": "09.00",
+              "otw": false,
+              "booking": false
+            },
+            {
+              "IsiRute": "DENPASAR ⇨ GILIMANUK",
+              "start": "11.00",
+              "finish": "14.00",
+              "otw": true,
+              "booking": false
+            }
+          ],
+          "tarifPerKM": 400
+        }
+      ],
+      "status": "favorit"
+    },
+    {
+      "nama_bus": "Sehati",
+      "bus": [
+        {
+          "platNomor": "DK 2233 WA",
+          "rute": "GILIMANUK ⇄ DENPASAR",
+          "koordinat": { "lat": -8.412241, "lng": 114.803323 },
+          "keberangkatan": [
+            {
+              "IsiRute": "DENPASAR ⇨ GILIMANUK",
+              "start": "06.00",
+              "finish": "09.00",
+              "otw": false,
+              "booking": true
+            },
+            {
+              "IsiRute": "GILIMANUK ⇨ DENPASAR",
+              "start": "11.00",
+              "finish": "14.00",
+              "otw": false,
+              "booking": true
+            }
+          ],
+          "tarifPerKM": 500
+        },
+        {
+          "platNomor": "DK 4212 WA",
+          "rute": "GILIMANUK ⇄ DENPASAR",
+          "koordinat": { "lat": -8.400393, "lng": 114.783099 },
+          "keberangkatan": [
+            {
+              "IsiRute": "DENPASAR ⇨ GILIMANUK",
+              "start": "05.00",
+              "finish": "08.00",
+              "otw": false,
+              "booking": false
+            },
+            {
+              "IsiRute": "GILIMANUK ⇨ DENPASAR",
+              "start": "10.00",
+              "finish": "13.00",
+              "otw": true,
+              "booking": false
+            }
+          ],
+          "tarifPerKM": 500
+        }
+      ],
+      "status": "booking"
+    }
+  ],
+  "status": "success"
+}
