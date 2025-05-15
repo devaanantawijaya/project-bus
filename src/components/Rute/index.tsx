@@ -6,7 +6,7 @@ interface IProv {
     React.SetStateAction<"Bali" | "Jawa Timur" | undefined>
   >;
   setPagRute: React.Dispatch<React.SetStateAction<number>>;
-  navigasi: "Rute" | "Jemput" | "Tujuan" | "Bus" | null;
+  navigasi: "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null;
   selectedRute: string | null;
 }
 

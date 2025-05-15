@@ -18,18 +18,36 @@ import { useForm } from "react-hook-form";
 import UseGetProvKab from "@/hook/useGetKabupaten";
 import { NamaLokasi } from "@/data/namaLokasi";
 import listBus from "@/data/listBus.json";
+import { getCookie, setCookie } from "cookies-next";
+import useLocalStorage from "@/hook/useLocalStorage";
+import { getFromLocalStorage, setToLocalStorage } from "@/utils/localStorage";
 
 interface IBookingBus {
-  rute: string;
+  rute: string | null;
   titikJemput: { lat: number; lng: number } | null;
   detailJemput: string | null;
   titikTujuan: { lat: number; lng: number } | null;
   detailTujuan: string | null;
+  namaBus: string | null;
+  nomorPlat: string | null;
+  nomorKursi: string | null;
 }
+
+type PlatBusType = {
+  nomorBus: string;
+  lokasiBus: { lat: number; lng: number };
+  lokasiBusTrue: boolean;
+  jarakDenganUser?: number;
+};
+
+type BusType = {
+  nama_bus: string;
+  platBus: PlatBusType[];
+};
 
 export default function BusPage() {
   const [navigasi, setNavigasi] = useState<
-    "Rute" | "Jemput" | "Tujuan" | "Bus" | null
+    "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null
   >("Rute");
   const [layananBus, setLayananBus] = useState<
     "List" | "Terdekat" | "Booking" | null
@@ -52,7 +70,8 @@ export default function BusPage() {
     undefined
   );
   const [openListBus, setOpenListBus] = useState(null);
-  const [selectedPlatNomor, setSelectedPlatNomor] = useState("");
+  const [selectedPlatNomor, setSelectedPlatNomor] = useState<string | null>("");
+  const [popUp, setPopUp] = useState(false);
 
   const { handleSubmit, setValue, watch } = useForm<IBookingBus>();
 
@@ -64,6 +83,9 @@ export default function BusPage() {
     console.log("detail jemput: ", data.detailJemput);
     console.log("titik tujuan: ", data.titikTujuan);
     console.log("detail tujuan: ", data.detailTujuan);
+    console.log("nama bus: ", data.namaBus);
+    console.log("nomor plat: ", data.nomorPlat);
+    console.log("nomor kursi: ", data.nomorKursi);
   };
 
   const handleOpenRute = () => {
@@ -84,6 +106,26 @@ export default function BusPage() {
   );
 
   const ruteForUser = cariProv?.rute;
+  const hasilListBus = [];
+
+  useEffect(() => {
+    const dataNavigasi = getFromLocalStorage<
+      "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null
+    >("navigasi", "Rute");
+    setNavigasi(dataNavigasi);
+
+    const dataKoordinatAwal = getFromLocalStorage<{
+      lat: number;
+      lng: number;
+    } | null>("koordinatAwal", null);
+    setKoordinatAwal(dataKoordinatAwal);
+
+    const dataLocationJemput = getFromLocalStorage<{
+      lat: number;
+      lng: number;
+    } | null>("titikJemput", null);
+    setSelectedLocationJemput(dataLocationJemput);
+  }, []);
 
   const {
     ChangeRute,
@@ -98,12 +140,17 @@ export default function BusPage() {
     focusRuteTujuan,
     focusSelectedLocationTujuan,
     setKoordinatAwal,
+    updateLokasiBusTrue,
+    updateListBus,
+    busFocus,
+    koordinatAwal,
   } = UseMap({
     from: ruteForUser ? ruteForUser[pagRute].from : { lat: 0, lng: 0 },
     to: ruteForUser ? ruteForUser[pagRute].to : { lat: 0, lng: 0 },
     center: ruteForUser ? ruteForUser[pagRute].center : { lat: 0, lng: 0 },
     userLocation: userLocation || { lat: 0, lng: 0 },
     navigasi: navigasi || null,
+    listBus: hasilListBus || [],
   });
 
   useEffect(() => {
@@ -122,14 +169,12 @@ export default function BusPage() {
   const cariNameProv = NamaLokasi.find(
     (prov) => prov.namaProv === nameProvinsi
   );
-
   let cariNameKab;
   if (cariNameProv) {
     cariNameKab = cariNameProv.kabupaten.find(
       (kab) => kab.namaKab === namekabupaten
     );
   }
-
   let cariNameKec;
   if (cariNameKab && selectedKec) {
     cariNameKec = cariNameKab.kecamatan.find(
@@ -137,10 +182,8 @@ export default function BusPage() {
     );
   }
 
-  const hasilListBus = [];
   listBus.data.forEach((brandBusGroup) => {
     const hasilListPlat = [];
-
     brandBusGroup.bus.forEach((listBus) => {
       const keberangkatanBus = listBus.keberangkatan.some(
         (data) =>
@@ -148,16 +191,17 @@ export default function BusPage() {
           data.otw === true &&
           data.booking === false
       );
-
       if (keberangkatanBus) {
-        hasilListPlat.push(listBus.platNomor);
+        hasilListPlat.push({
+          nomorBus: listBus.platNomor,
+          lokasiBus: listBus.koordinat,
+        });
       }
     });
-
     if (hasilListPlat.length > 0) {
       hasilListBus.push({
         nama_bus: brandBusGroup.nama_bus,
-        platNomor: hasilListPlat,
+        platBus: hasilListPlat,
       });
     }
   });
@@ -165,6 +209,8 @@ export default function BusPage() {
   const toggleOpenListBus = (idx) => {
     setOpenListBus(openListBus === idx ? null : idx);
   };
+
+  console.log("koordinat awal", koordinatAwal)
 
   return (
     <div className="relative w-full">
@@ -230,6 +276,18 @@ export default function BusPage() {
                 setNameProvinsi(undefined);
                 setTempatSpesifik(undefined);
                 setValue("detailTujuan", null);
+              }}
+            >
+              <FaArrowLeft className="text-4xl" />
+            </button>
+          )}
+          {navigasi === "Bayar" && (
+            <button
+              className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
+              onClick={() => {
+                setNavigasi("Bus");
+                setIsOpenRute(true);
+                setPopUp(false);
               }}
             >
               <FaArrowLeft className="text-4xl" />
@@ -306,6 +364,8 @@ export default function BusPage() {
             isOpenRute
               ? navigasi === "Bus"
                 ? "h-[400px]"
+                : navigasi === "Bayar"
+                ? "h-[510px]"
                 : "h-[470px]"
               : "h-36"
           }`}
@@ -432,6 +492,18 @@ export default function BusPage() {
                                   lng: ruteForUser?.[pagRute]?.to?.lng || 0,
                                 }
                           );
+                          setToLocalStorage(
+                            "koordinatAwal",
+                            idx === 0
+                              ? {
+                                  lat: ruteForUser?.[pagRute]?.from?.lat || 0,
+                                  lng: ruteForUser?.[pagRute]?.from?.lng || 0,
+                                }
+                              : {
+                                  lat: ruteForUser?.[pagRute]?.to?.lat || 0,
+                                  lng: ruteForUser?.[pagRute]?.to?.lng || 0,
+                                }
+                          );
                         }}
                       >
                         {namaRute}
@@ -467,6 +539,7 @@ export default function BusPage() {
                     onClick={() => {
                       setIsOpenRute(false);
                       setNavigasi("Jemput");
+                      setToLocalStorage("navigasi", "Jemput");
                     }}
                   >
                     LANJUT
@@ -499,7 +572,6 @@ export default function BusPage() {
                     onClick={() => {
                       handleOpenRute();
                       handleLokasiJemput();
-                      setValue("titikJemput", selectedLocationJemput);
                     }}
                   >
                     TITIK JEMPUT
@@ -583,7 +655,12 @@ export default function BusPage() {
                       );
                       setIsOpenRute(false);
                       setTempatSpesifik(undefined);
+                      localStorage.setItem("lastNavigasi", "Tujuan");
                       setNavigasi("Tujuan");
+                      localStorage.setItem(
+                        "detailJemput",
+                        `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
+                      );
                     }}
                   >
                     LANJUT
@@ -695,7 +772,9 @@ export default function BusPage() {
                         `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
                       );
                       setIsOpenRute(false);
+                      setCookie("lastNavigasi", "Bus");
                       setNavigasi("Bus");
+                      updateLokasiBusTrue();
                     }}
                   >
                     LANJUT
@@ -763,10 +842,12 @@ export default function BusPage() {
                   </div>
                   <div>
                     <h1 className="text-center text-xl mb-2">
-                      ISI LAYANAN BUS
+                      ISI LAYANAN {layananBus === "List" ? "" : "BUS"}
                     </h1>
                     <h1 className="text-center text-xl">
-                      {layananBus?.toLocaleUpperCase()}
+                      {layananBus === "List"
+                        ? `${layananBus?.toLocaleUpperCase()} BUS`
+                        : layananBus?.toLocaleUpperCase()}
                     </h1>
                   </div>
                   {/* CLose */}
@@ -776,6 +857,7 @@ export default function BusPage() {
                     onClick={() => {
                       handleOpenRute();
                       setLayananBus(null);
+                      setSelectedPlatNomor(null);
                     }}
                   >
                     <MdCancelPresentation className="text-3xl" />
@@ -785,38 +867,66 @@ export default function BusPage() {
                 {layananBus === "List" && (
                   <div>
                     <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
-                      {hasilListBus.map((item, idx) => (
-                        <div key={idx}>
-                          <div
-                            className="bg-[#35F9D1] font-bold text-[#1A443B] p-2 text-xl rounded-lg w-full flex items-center justify-between"
-                            onClick={() => toggleOpenListBus(idx)}
-                          >
-                            <div>BUS {item.nama_bus.toLocaleUpperCase()}</div>
-                            <div>{openListBus === idx ? "▲" : "▼"}</div>
-                          </div>
-                          {openListBus === idx && (
-                            <ul className="flex flex-col gap-y-1 mt-2 text-xl px-2">
-                              {item.platNomor.map((plat, i) => (
-                                <li key={i} className="border-b-2 pb-1">
-                                  <label className="cursor-pointer flex justify-between">
-                                    <span>{plat}</span>
-                                    <input
-                                      type="radio"
-                                      name="platNomor"
-                                      value={plat}
-                                      checked={selectedPlatNomor === plat}
-                                      onChange={() =>
-                                        setSelectedPlatNomor(plat)
-                                      }
-                                      className="w-6 h-6"
-                                    />
-                                  </label>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
+                      {updateListBus &&
+                        (updateListBus as BusType[])
+                          .filter((item) =>
+                            item.platBus.some(
+                              (plat) => plat.lokasiBusTrue === true
+                            )
+                          )
+                          .map((item, idx) => (
+                            <div key={idx}>
+                              <div
+                                className="bg-[#35F9D1] font-bold text-[#1A443B] p-2 text-xl rounded-lg w-full flex items-center justify-between"
+                                onClick={() => toggleOpenListBus(idx)}
+                              >
+                                <div
+                                  onClick={() =>
+                                    setValue("namaBus", item.nama_bus)
+                                  }
+                                >
+                                  BUS {item.nama_bus.toLocaleUpperCase()}
+                                </div>
+                                <div>{openListBus === idx ? "▲" : "▼"}</div>
+                              </div>
+                              {openListBus === idx && (
+                                <ul className="flex flex-col gap-y-1 mt-2 text-xl px-2">
+                                  {item.platBus.map((plat, i) => (
+                                    <li key={i} className="border-b-2 pb-1">
+                                      <label className="cursor-pointer flex justify-between">
+                                        <span>{plat.nomorBus}</span>
+                                        <div className="flex items-center gap-x-2">
+                                          <span>{`${plat.jarakDenganUser} KM`}</span>
+                                          <input
+                                            type="radio"
+                                            name="platNomor"
+                                            value={plat.nomorBus}
+                                            checked={
+                                              selectedPlatNomor ===
+                                              plat.nomorBus
+                                            }
+                                            onChange={() => {
+                                              setSelectedPlatNomor(
+                                                plat.nomorBus
+                                              );
+                                              setValue(
+                                                "nomorPlat",
+                                                plat.nomorBus
+                                              );
+                                              busFocus({
+                                                koordinat: plat.lokasiBus,
+                                              });
+                                            }}
+                                            className="w-6 h-6"
+                                          />
+                                        </div>
+                                      </label>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ))}
                     </div>
                     <div className="mt-4">
                       <button
@@ -826,18 +936,232 @@ export default function BusPage() {
                             ? "bg-[#35F9D1] font-bold"
                             : "bg-[#25b498]"
                         }`}
+                        disabled={!selectedPlatNomor}
+                        onClick={() => {
+                          setPopUp(true);
+                        }}
                       >
-                        LANJUT
+                        PILIH KURSI & LANJUT
                       </button>
                     </div>
                   </div>
                 )}
-
                 {/* Isi Bus Terdekat */}
-                {layananBus === "Terdekat" && <div>Ini Isi Terdekat</div>}
-
+                {layananBus === "Terdekat" && (
+                  <div>
+                    <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
+                      {updateListBus && (
+                        <div className="flex flex-col gap-2">
+                          {(updateListBus as BusType[])
+                            .flatMap((bus) =>
+                              bus.platBus
+                                .filter((plat) => plat.lokasiBusTrue === true)
+                                .map((plat) => ({
+                                  namaBus: bus.nama_bus,
+                                  ...plat,
+                                }))
+                            )
+                            .sort(
+                              (a, b) =>
+                                (a.jarakDenganUser ?? Infinity) -
+                                (b.jarakDenganUser ?? Infinity)
+                            )
+                            .map((item, idx) => (
+                              <label
+                                key={idx}
+                                className="flex justify-between items-center border-b py-2 text-lg"
+                              >
+                                <div>
+                                  BUS {item.namaBus.toUpperCase()} [
+                                  {item.nomorBus}]
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span>
+                                    {(item.jarakDenganUser ?? 0).toFixed(2)} KM
+                                  </span>
+                                  <input
+                                    type="radio"
+                                    name="pilihBus"
+                                    value={item.nomorBus}
+                                    checked={
+                                      selectedPlatNomor === item.nomorBus
+                                    }
+                                    onChange={() => {
+                                      setSelectedPlatNomor(item.nomorBus);
+                                      setValue("nomorPlat", item.nomorBus);
+                                      busFocus({ koordinat: item.lokasiBus });
+                                    }}
+                                    className="w-5 h-5"
+                                  />
+                                </div>
+                              </label>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                          selectedPlatNomor
+                            ? "bg-[#35F9D1] font-bold"
+                            : "bg-[#25b498]"
+                        }`}
+                        disabled={!selectedPlatNomor}
+                        onClick={() => {
+                          setPopUp(true);
+                        }}
+                      >
+                        PILIH KURSI & LANJUT
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {/* Isi Bus Booking */}
                 {layananBus === "Booking" && <div>Ini Isi Booking</div>}
+                {/* Pop Up Pilih Kursi */}
+                {popUp && (
+                  <div
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+                    onClick={() => setPopUp(false)}
+                  >
+                    <div
+                      className="bg-white p-5 rounded-2xl w-[80%] max-w-md shadow-xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <MdCancelPresentation className="text-2xl text-white" />
+                        </div>
+                        <h2 className="text-xl font-bold text-black">
+                          PILIH KURSI:
+                        </h2>
+                        <button type="button" onClick={() => setPopUp(false)}>
+                          <MdCancelPresentation className="text-2xl text-gray-700" />
+                        </button>
+                      </div>
+
+                      {/* Denah kursi berdasarkan layout bus*/}
+                      <div className="mb-6 space-y-2 border-2 p-3 rounded-xl">
+                        {/* Kursi Driver */}
+                        <div className="grid grid-cols-3 px-2">
+                          <div className="p-2" />
+                          <div className="p-2" />
+                          <div className="p-2 bg-[#35F9D1] rounded-lg text-sm font-bold hover:bg-[#25b498] text-black text-center">
+                            DRIVER
+                          </div>
+                        </div>
+                        {/* kursi depan */}
+                        {[...Array(6)].map((_, rowIndex) => {
+                          const base = rowIndex * 4;
+                          return (
+                            <div
+                              key={rowIndex}
+                              className="grid grid-cols-5 gap-2"
+                            >
+                              {[...Array(5)].map((_, colIndex) => {
+                                if (colIndex === 2) {
+                                  // Spasi tengah
+                                  return <div key={`spacer-${rowIndex}`} />;
+                                } else {
+                                  const seatNumber =
+                                    base +
+                                    (colIndex > 2 ? colIndex - 1 : colIndex) +
+                                    1;
+                                  return (
+                                    <button
+                                      key={seatNumber}
+                                      type="button"
+                                      className="p-2 bg-[#35F9D1] rounded-lg text-sm font-bold hover:bg-[#25b498] text-black"
+                                    >
+                                      {seatNumber}
+                                    </button>
+                                  );
+                                }
+                              })}
+                            </div>
+                          );
+                        })}
+
+                        {/* kursi side tangga */}
+                        <div className="grid grid-cols-5 gap-2">
+                          {/* Spacer kolom 0,1,2 */}
+                          <div />
+                          <div />
+                          <div />
+                          {[...Array(2)].map((_, i) => {
+                            const seatNumber = i + 25;
+                            return (
+                              <button
+                                key={seatNumber}
+                                type="button"
+                                className="p-2 bg-[#35F9D1] rounded-lg text-sm font-bold hover:bg-[#25b498] text-black"
+                              >
+                                {seatNumber}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* kursi belakang */}
+                        <div className="grid grid-cols-5 gap-2">
+                          {[...Array(5)].map((_, i) => {
+                            const seatNumber = i + 27;
+                            return (
+                              <button
+                                key={seatNumber}
+                                type="button"
+                                className="p-2 bg-[#35F9D1] rounded-lg text-sm font-bold hover:bg-[#25b498] text-black"
+                              >
+                                {seatNumber}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`text-[#1A443B] w-full py-3  text-xl rounded-3xl bg-[#25b498]`}
+                        onClick={() => {
+                          setIsOpenRute(true);
+                          setCookie("lastNavigasi", "Bayar");
+                          setNavigasi("Bayar");
+                        }}
+                      >
+                        LANJUT PEMBAYARAN
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {/* Pembayaran */}
+          {navigasi === "Bayar" && (
+            <div className={`${isOpenRute ? "block" : "hidden"}`}>
+              <h1 className="text-center text-xl mb-5">DETAIL PEMBAYARAN</h1>
+              <div className="overflow-y-auto h-[350px] border p-2 rounded-xl">
+                <p className="pb-2">RUTE: {selectedRute}</p>
+                <p className="pb-2">Lokasi Jemput: {watch("detailJemput")}</p>
+                <p className="pb-2">Lokasi Tujuan: {watch("detailTujuan")}</p>
+                <p className="pb-2">
+                  Nama Bus: BUS {watch("namaBus")?.toLocaleUpperCase()}{" "}
+                  {`[ ${watch("nomorPlat")} ]`}
+                </p>
+                <p className="pb-2">No. Kursi: 00</p>
+                <p className="pb-2">Tarif Bus: Rp.400/km</p>
+                <p className="pb-2">Jarak Tempuh: 000 km</p>
+                <p className="pb-2">Fee Pelayanan: Rp.2000</p>
+                <p className="pb-2">Total Harga: Rp.42.000</p>
+              </div>
+              <div className="mt-5">
+                <button
+                  type="button"
+                  className={`text-[#1A443B] w-full py-3  text-xl rounded-3xl bg-[#35F9D1] font-bold`}
+                >
+                  BAYAR
+                </button>
               </div>
             </div>
           )}

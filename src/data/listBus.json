@@ -6,7 +6,12 @@
         {
           "platNomor": "DK 1111 WA",
           "rute": "GILIMANUK ⇄ DENPASAR",
-          "koordinat": { "lat": -8.391088, "lng": 114.751154 },
+          "koordinat": { "lat": -8.376664, "lng": 114.683039 },
+          "tanggal": [
+            "13-05-2025",
+            "14-05-2025",
+            "15-05-2025"
+          ],
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -23,7 +28,18 @@
               "booking": true
             }
           ],
-          "tarifPerKM": 400
+          "tarifPerKM": 395,
+          "denahKursi": {
+            "13-05-2025": [
+            [1, 2,0, 3, 4],
+            [3,4,0,5,6],
+            [0,0, 9, 10],
+            [10,11,12,13,14]
+          ]
+          },
+          "kursiTerisi": [
+            1, 2, 4
+          ]
         },
         {
           "platNomor": "DK 2222 WA",
@@ -45,12 +61,26 @@
               "booking": true
             }
           ],
-          "tarifPerKM": 400
+          "tarifPerKM": 395,
+          "jumlahKursi": {
+            "kursiSideSopir": 0,
+            "kursiDepan": 24,
+            "kursiSideTangga": 2,
+            "kursiTengah": 0,
+            "kursiBelakang": 5
+          },
+          "kursiTerisi": {
+            "kursiSideSopir": [],
+            "kursiDepan": [2, 5, 15],
+            "kursiSideTangga": [26],
+            "kursiTengah": [],
+            "kursiBelakang": [28]
+          }
         },
         {
           "platNomor": "DK 3333 WA",
           "rute": "GILIMANUK ⇄ DENPASAR",
-          "koordinat": { "lat": -8.397547, "lng": 114.763719 },
+          "koordinat": { "lat": -8.488818, "lng": 114.950944 },
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -67,9 +97,24 @@
               "booking": false
             }
           ],
-          "tarifPerKM": 400
+          "tarifPerKM": 395,
+          "jumlahKursi": {
+            "kursiSideSopir": 0,
+            "kursiDepan": 24,
+            "kursiSideTangga": 2,
+            "kursiTengah": 0,
+            "kursiBelakang": 5
+          },
+          "kursiTerisi": {
+            "kursiSideSopir": [],
+            "kursiDepan": [2, 5, 15],
+            "kursiSideTangga": [26],
+            "kursiTengah": [],
+            "kursiBelakang": [28]
+          }
         }
       ],
+
       "status": "favorit"
     },
     {
@@ -95,7 +140,21 @@
               "booking": true
             }
           ],
-          "tarifPerKM": 500
+          "tarifPerKM": 390,
+          "jumlahKursi": {
+            "kursiSideSopir": 0,
+            "kursiDepan": 24,
+            "kursiSideTangga": 2,
+            "kursiTengah": 0,
+            "kursiBelakang": 5
+          },
+          "kursiTerisi": {
+            "kursiSideSopir": [],
+            "kursiDepan": [2, 5, 15],
+            "kursiSideTangga": [26],
+            "kursiTengah": [],
+            "kursiBelakang": [28]
+          }
         },
         {
           "platNomor": "DK 4212 WA",
@@ -117,7 +176,21 @@
               "booking": false
             }
           ],
-          "tarifPerKM": 500
+          "tarifPerKM": 390,
+          "jumlahKursi": {
+            "kursiSideSopir": 0,
+            "kursiDepan": 24,
+            "kursiSideTangga": 2,
+            "kursiTengah": 0,
+            "kursiBelakang": 5
+          },
+          "kursiTerisi": {
+            "kursiSideSopir": [],
+            "kursiDepan": [2, 5, 15],
+            "kursiSideTangga": [26],
+            "kursiTengah": [],
+            "kursiBelakang": [28]
+          }
         }
       ],
       "status": "booking"

@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+import { setToLocalStorage } from "@/utils/localStorage";
 
 interface IUseMaps {
   center: { lat: number; lng: number };
@@ -10,6 +11,23 @@ interface IUseMaps {
   to: { lat: number; lng: number };
   userLocation: { lat: number; lng: number };
   navigasi: "Rute" | "Jemput" | "Tujuan" | "Bus" | null;
+  listBus: DataBus[];
+}
+
+interface LokasiBus {
+  lat: number;
+  lng: number;
+}
+
+interface PlatBus {
+  nomorBus: string;
+  lokasiBus: LokasiBus;
+  lokasiBusTrue: boolean;
+}
+
+interface DataBus {
+  nama_bus: string;
+  platBus: PlatBus[];
 }
 
 export default function UseMap({
@@ -18,6 +36,7 @@ export default function UseMap({
   to,
   userLocation,
   navigasi,
+  listBus,
 }: IUseMaps) {
   const mapRef = useRef<L.Map | null>(null);
   const routingRef = useRef<L.Routing.Control | null>(null);
@@ -35,6 +54,7 @@ export default function UseMap({
     lat: number;
     lng: number;
   } | null>(null);
+  const [updateListBus, setUpdateListBus] = useState(listBus);
 
   // Rute: Trigger Fokus ke Rute
   const ChangeRute = ({
@@ -60,9 +80,9 @@ export default function UseMap({
     mapRef.current?.setView([userLocation?.lat, userLocation?.lng], zoom);
   };
 
-  // Rute: Awal Render Fokus ke Rute
+  // Rute: Awal Render Munculin Peta dan fokus ke user
   useEffect(() => {
-    if (!mapRef.current && userLocation) {
+    if (!mapRef.current && userLocation && navigasi === "Rute") {
       // Awal Render Fokus ke User Dulu
       mapRef.current = L.map("map", {
         center: [userLocation.lat, userLocation.lng],
@@ -83,7 +103,7 @@ export default function UseMap({
         },
       }).addTo(mapRef.current);
     }
-  }, []);
+  }, [userLocation]);
 
   // Rute: Awal Render Fokus ke User
   useEffect(() => {
@@ -173,10 +193,15 @@ export default function UseMap({
   const handleLokasiJemput = () => {
     if (mapRef.current && navigasi === "Jemput") {
       const getLokasiJemput = mapRef.current.getCenter();
-      setSelectedLocationJemput({
+
+      const location = {
         lat: getLokasiJemput.lat,
         lng: getLokasiJemput.lng,
-      }); // Simpan lokasi saat tombol ditekan
+      }
+
+      setSelectedLocationJemput(location); // Simpan lokasi saat tombol ditekan
+
+      setToLocalStorage("titikJemput", location);
 
       // Update posisi marker ke lokasi yang dipilih
       if (markerRef.current) {
@@ -286,22 +311,175 @@ export default function UseMap({
         const map = mapRef.current;
 
         if (map) {
-          // Geser tampilan peta ke lokasi tujuan
           map.setView([lat, lng], 11);
 
-          // Buat custom icon (optional)
+          // Buat custom icon
           const customIcon = L.icon({
-            iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // ganti dengan path icon kamu
-            iconSize: [32, 32], // sesuaikan ukuran
-            iconAnchor: [16, 32], // titik anchor icon (biasanya bagian bawah tengah)
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
           });
 
-          // Tambahkan marker
-          L.marker([lat, lng], { icon: customIcon }).addTo(map);
+          // Hapus marker lama kalau ada
+          if (markerRef.current) {
+            markerRef.current.remove();
+          }
+
+          // Buat marker baru dan simpan di ref
+          markerRef.current = L.marker([lat, lng], { icon: customIcon }).addTo(
+            map
+          );
         }
       }, 500);
     }
   }, [navigasi, selectedLocationJemput]);
+
+  // true false lokasi list bus
+  // const updateLokasiBusTrue = () => {
+  //   if (mapRef.current && koordinatAwal && selectedLocationJemput) {
+  //     const routing = L.Routing.osrmv1(); // Engine routing default
+
+  //     routing.route(
+  //       [
+  //         L.Routing.waypoint(L.latLng(koordinatAwal.lat, koordinatAwal.lng)),
+  //         L.Routing.waypoint(
+  //           L.latLng(selectedLocationJemput.lat, selectedLocationJemput.lng)
+  //         ),
+  //       ],
+  //       (err, routes) => {
+  //         if (!err && routes && routes.length > 0) {
+  //           const routeCoords = routes[0].coordinates;
+
+  //           const updatedBus = listBus.map((bus) => ({
+  //             ...bus,
+  //             platBus: bus.platBus.map((plat) => {
+  //               const isTrue = isNearRoute(routeCoords, plat.lokasiBus, 100);
+  //               return {
+  //                 ...plat,
+  //                 lokasiBusTrue: isTrue,
+  //               };
+  //             }),
+  //           }));
+
+  //           setUpdateListBus(updatedBus);
+  //         } else {
+  //           console.error("❌ Gagal menghitung rute:", err);
+  //         }
+  //       }
+  //     );
+  //   } else {
+  //     console.warn("❌ Ada data yang belum tersedia:", {
+  //       mapRef: mapRef.current,
+  //       koordinatAwal,
+  //       selectedLocationJemput,
+  //     });
+  //   }
+
+  //   const isNearRoute = (routeCoords, checkLatLng, maxDistanceMeters = 100) => {
+  //     return routeCoords.some((point) => {
+  //       const dist = L.latLng(point.lat, point.lng).distanceTo(
+  //         L.latLng(checkLatLng.lat, checkLatLng.lng)
+  //       );
+  //       return dist <= maxDistanceMeters;
+  //     });
+  //   };
+  // };
+
+  const updateLokasiBusTrue = () => {
+    if (mapRef.current && koordinatAwal && selectedLocationJemput) {
+      const routing = L.Routing.osrmv1();
+
+      routing.route(
+        [
+          L.Routing.waypoint(L.latLng(koordinatAwal.lat, koordinatAwal.lng)),
+          L.Routing.waypoint(
+            L.latLng(selectedLocationJemput.lat, selectedLocationJemput.lng)
+          ),
+        ],
+        (err, routes) => {
+          if (!err && routes && routes.length > 0) {
+            const routeCoords = routes[0].coordinates;
+
+            const userLatLng = L.latLng(
+              selectedLocationJemput.lat,
+              selectedLocationJemput.lng
+            ); // lokasi user
+
+            const updatedBus = listBus.map((bus) => ({
+              ...bus,
+              platBus: bus.platBus.map((plat) => {
+                const isTrue = isNearRoute(routeCoords, plat.lokasiBus, 100);
+
+                const busLatLng = L.latLng(
+                  plat.lokasiBus.lat,
+                  plat.lokasiBus.lng
+                );
+                const jarak = userLatLng.distanceTo(busLatLng) / 1000; // meter to kilometer
+
+                return {
+                  ...plat,
+                  lokasiBusTrue: isTrue,
+                  jarakDenganUser: parseFloat(jarak.toFixed(2)), // misalnya: 3.75
+                };
+              }),
+            }));
+
+            setUpdateListBus(updatedBus);
+          } else {
+            console.error("❌ Gagal menghitung rute:", err);
+          }
+        }
+      );
+    } else {
+      console.warn("❌ Ada data yang belum tersedia:", {
+        mapRef: mapRef.current,
+        koordinatAwal,
+        selectedLocationJemput,
+      });
+    }
+
+    const isNearRoute = (routeCoords, checkLatLng, maxDistanceMeters = 100) => {
+      return routeCoords.some((point) => {
+        const dist = L.latLng(point.lat, point.lng).distanceTo(
+          L.latLng(checkLatLng.lat, checkLatLng.lng)
+        );
+        return dist <= maxDistanceMeters;
+      });
+    };
+  };
+
+  // Fokus ke Bus
+  const busFocus = ({
+    koordinat,
+  }: {
+    koordinat: { lat: number; lng: number };
+  }) => {
+    if (!mapRef.current) return;
+
+    // Hapus marker lama
+    if (markerRef.current) {
+      mapRef.current.removeLayer(markerRef.current);
+    }
+
+    // Buat custom icon
+    const busIcon = L.icon({
+      iconUrl: "https://cdn-icons-png.flaticon.com/512/3448/3448339.png", // ganti dengan link kamu
+      iconSize: [40, 40], // ukuran ikon [width, height]
+      iconAnchor: [20, 40], // titik anchor (biasanya bagian bawah ikon)
+    });
+
+    // Buat marker baru pakai icon
+    const newMarker = L.marker([koordinat.lat, koordinat.lng], {
+      icon: busIcon,
+    });
+
+    // Tambah ke peta dan simpan ke ref
+    newMarker.addTo(mapRef.current);
+    markerRef.current = newMarker;
+
+    // Fokus ke lokasi
+    mapRef.current.setView([koordinat.lat, koordinat.lng], 14);
+  };
 
   return {
     ChangeRute,
@@ -316,6 +494,9 @@ export default function UseMap({
     focusRuteTujuan,
     focusSelectedLocationTujuan,
     setKoordinatAwal,
+    updateLokasiBusTrue,
+    updateListBus,
+    busFocus,
     koordinatAwal,
   };
 }
