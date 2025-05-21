@@ -7,7 +7,7 @@ interface IProv {
   >;
   setPagRute: React.Dispatch<React.SetStateAction<number>>;
   navigasi: "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null;
-  selectedRute: string | null;
+  selectedRute?: string | null;
 }
 
 export default function Rute({
@@ -29,7 +29,7 @@ export default function Rute({
               setPagRute(0);
             }}
           >
-            <option value="" disabled selected>
+            <option disabled selected>
               Pilih Provinsi
             </option>
             <option value="Bali">Bali</option>

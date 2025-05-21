@@ -9,8 +9,8 @@ export default function ScreenPage() {
       <div className="pb-5">
         <BrandIcon size={150} />
       </div>
-      <h1 className="text-4xl font-extrabold pb-5">Trans-nyaBli</h1>
-      <p className="text-3xl">Customer</p>
+      <h1 className="text-4xl font-extrabold pb-5">TransBli</h1>
+      {/* <p className="text-3xl">Customer</p> */}
     </div>
   );
 }

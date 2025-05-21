@@ -1,25 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Rute from "@/components/Rute";
-import { MdCancelPresentation } from "react-icons/md";
-import { IoMdArrowDropup } from "react-icons/io";
-import { IoMdArrowDropdown } from "react-icons/io";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
 import { BiTargetLock } from "react-icons/bi";
-import Link from "next/link";
+import { useForm } from "react-hook-form";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
+import { MdCancelPresentation } from "react-icons/md";
+import useUserLocationV2 from "@/hook/useUserLocationV2";
+import Rute from "@/components/Rute";
+import UseGetProvinceV2 from "@/hook/useGetProvinceV2";
 import { RutePerProvinsi } from "@/data/rutePerProv";
-import UseUserLocation from "@/hook/useUserLocation";
-import UseGetProvince from "@/hook/useGetProvince";
-import UseMap from "@/hook/useMap";
-import { useForm } from "react-hook-form";
-import UseGetProvKab from "@/hook/useGetKabupaten";
-import { NamaLokasi } from "@/data/namaLokasi";
-import listBus from "@/data/listBus.json";
-import { getCookie, setCookie } from "cookies-next";
-
+import useChangeRoute from "@/hook/useChangeRoute";
+import L from "leaflet";
+import useHandleFocus from "@/hook/useHandleFocus";
 
 interface IBookingBus {
   rute: string | null;
@@ -32,49 +28,36 @@ interface IBookingBus {
   nomorKursi: string | null;
 }
 
-type PlatBusType = {
-  nomorBus: string;
-  lokasiBus: { lat: number; lng: number };
-  lokasiBusTrue: boolean;
-  jarakDenganUser?: number;
-};
+// Load MapView hanya di client-side
+const DynamicMap = dynamic(() => import("@/components/MapView"), {
+  ssr: false,
+  loading: () => <p>Loading map...</p>,
+});
 
-type BusType = {
-  nama_bus: string;
-  platBus: PlatBusType[];
-};
-
-export default function BusPage() {
+export default function BusPageV2() {
   const [navigasi, setNavigasi] = useState<
     "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null
   >("Rute");
+  const [isOpenRute, setIsOpenRute] = useState(false);
   const [layananBus, setLayananBus] = useState<
     "List" | "Terdekat" | "Booking" | null
   >(null);
-  const [isOpenRute, setIsOpenRute] = useState(false);
-  const [isOpenDetailRute, setOpenDetailRute] = useState<"A" | "B" | null>(
-    null
-  );
+  const [popUp, setPopUp] = useState(false);
   const [pagRute, setPagRute] = useState<number>(0);
-  const { userLocation } = UseUserLocation();
-  const { province } = UseGetProvince();
   const [prov, setProv] = useState<"Bali" | "Jawa Timur" | undefined>(
     undefined
   );
-  const [selectedKec, setSelectedKec] = useState<string | undefined>(undefined);
-  const [selectedDesaKel, setSelectedDesaKel] = useState<string | undefined>(
-    undefined
-  );
-  const [tempatSpesifik, setTempatSpesifik] = useState<string | undefined>(
-    undefined
-  );
-  const [openListBus, setOpenListBus] = useState(null);
-  const [selectedPlatNomor, setSelectedPlatNomor] = useState<string | null>("");
-  const [popUp, setPopUp] = useState(false);
+  const mapRef = useRef<L.Map | null>(null);
+  const routingRef = useRef<L.Routing.Control | null>(null);
 
+  const { userLocation } = useUserLocationV2();
+  const { province } = UseGetProvinceV2();
+  const { handleFocus } = useHandleFocus({ mapRef: mapRef });
+  const { ChangeRute } = useChangeRoute({
+    mapRef: mapRef,
+    routingRef: routingRef,
+  });
   const { handleSubmit, setValue, watch } = useForm<IBookingBus>();
-
-  const selectedRute = watch("rute");
 
   const handleBooking = (data: IBookingBus) => {
     console.log("Rute: ", data.rute);
@@ -91,10 +74,6 @@ export default function BusPage() {
     setIsOpenRute(!isOpenRute);
   };
 
-  const handleOpenDetailRute = (detailRute: "A" | "B") => {
-    setOpenDetailRute(isOpenDetailRute === detailRute ? null : detailRute);
-  };
-
   useEffect(() => {
     setProv(province);
   }, [province]);
@@ -103,105 +82,17 @@ export default function BusPage() {
     (provinsi) =>
       provinsi?.namaProvinsi?.toLocaleLowerCase() === prov?.toLocaleLowerCase()
   );
-
   const ruteForUser = cariProv?.rute;
-  const hasilListBus: any[] = [];
-
-  const {
-    ChangeRute,
-    userFocus,
-    handleLokasiJemput,
-    selectedLocationJemput,
-    setSelectedLocationJemput,
-    focusSelectedLocationJemput,
-    handleLokasiTujuan,
-    selectedLocationTujuan,
-    setSelectedLocationTujuan,
-    focusRuteTujuan,
-    focusSelectedLocationTujuan,
-    setKoordinatAwal,
-    updateLokasiBusTrue,
-    updateListBus,
-    busFocus,
-    koordinatAwal,
-  } = UseMap({
-    from: ruteForUser ? ruteForUser[pagRute].from : { lat: 0, lng: 0 },
-    to: ruteForUser ? ruteForUser[pagRute].to : { lat: 0, lng: 0 },
-    center: ruteForUser ? ruteForUser[pagRute].center : { lat: 0, lng: 0 },
-    userLocation: userLocation || { lat: 0, lng: 0 },
-    navigasi: navigasi || null,
-    listBus: hasilListBus || [],
-  });
-
-  useEffect(() => {
-    ChangeRute({
-      from: ruteForUser ? ruteForUser[pagRute].from : { lat: 0, lng: 0 },
-      to: ruteForUser ? ruteForUser[pagRute].to : { lat: 0, lng: 0 },
-      center: ruteForUser ? ruteForUser[pagRute].center : { lat: 0, lng: 0 },
-    });
-  }, [ruteForUser, ChangeRute, pagRute]);
-
-  const selectedLocationNaikTurun =
-    navigasi === "Jemput" ? selectedLocationJemput : selectedLocationTujuan;
-  const { namekabupaten, setNameKabupaten, nameProvinsi, setNameProvinsi } =
-    UseGetProvKab(selectedLocationNaikTurun);
-
-  const cariNameProv = NamaLokasi.find(
-    (prov) => prov.namaProv === nameProvinsi
-  );
-  let cariNameKab;
-  if (cariNameProv) {
-    cariNameKab = cariNameProv.kabupaten.find(
-      (kab) => kab.namaKab === namekabupaten
-    );
-  }
-  let cariNameKec;
-  if (cariNameKab && selectedKec) {
-    cariNameKec = cariNameKab.kecamatan.find(
-      (kec) => kec.namaKec === selectedKec
-    );
-  }
-
-  listBus.data.forEach((brandBusGroup) => {
-    const hasilListPlat = [];
-    brandBusGroup.bus.forEach((listBus) => {
-      const keberangkatanBus = listBus.keberangkatan.some(
-        (data) =>
-          data.IsiRute === selectedRute &&
-          data.otw === true &&
-          data.booking === false
-      );
-      if (keberangkatanBus) {
-        hasilListPlat.push({
-          nomorBus: listBus.platNomor,
-          lokasiBus: listBus.koordinat,
-        });
-      }
-    });
-    if (hasilListPlat.length > 0) {
-      hasilListBus.push({
-        nama_bus: brandBusGroup.nama_bus,
-        platBus: hasilListPlat,
-      });
-    }
-  });
-
-  const toggleOpenListBus = (idx) => {
-    setOpenListBus(openListBus === idx ? null : idx);
-  };
-
-  console.log("koordinat awal", koordinatAwal);
+  if (!ruteForUser) return undefined;
 
   return (
-    <div className="relative w-full">
-      <Rute
+    <div>
+      {/* <Rute
         prov={prov}
         setProv={setProv}
         setPagRute={setPagRute}
         navigasi={navigasi}
-        selectedRute={selectedRute}
-      />
-
+      /> */}
       <div className="fixed bottom-0 w-full z-50">
         {/* Back Home, Fokus Rute, User Location */}
         <div className="flex justify-between items-center mb-5 mx-5">
@@ -217,14 +108,14 @@ export default function BusPage() {
           {navigasi === "Jemput" && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
-              onClick={() => {
-                setIsOpenRute(false);
-                setNavigasi("Rute");
-                setSelectedLocationJemput(null);
-                setNameKabupaten(undefined);
-                setNameProvinsi(undefined);
-                setTempatSpesifik(undefined);
-              }}
+              // onClick={() => {
+              //   setIsOpenRute(false);
+              //   setNavigasi("Rute");
+              //   setSelectedLocationJemput(null);
+              //   setNameKabupaten(undefined);
+              //   setNameProvinsi(undefined);
+              //   setTempatSpesifik(undefined);
+              // }}
             >
               <FaArrowLeft className="text-4xl" />
             </button>
@@ -232,15 +123,15 @@ export default function BusPage() {
           {navigasi === "Tujuan" && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
-              onClick={() => {
-                setIsOpenRute(false);
-                setNavigasi("Jemput");
-                setSelectedLocationJemput(null);
-                setNameKabupaten(undefined);
-                setNameProvinsi(undefined);
-                setTempatSpesifik(undefined);
-                setValue("detailJemput", null);
-              }}
+              // onClick={() => {
+              //   setIsOpenRute(false);
+              //   setNavigasi("Jemput");
+              //   setSelectedLocationJemput(null);
+              //   setNameKabupaten(undefined);
+              //   setNameProvinsi(undefined);
+              //   setTempatSpesifik(undefined);
+              //   setValue("detailJemput", null);
+              // }}
             >
               <FaArrowLeft className="text-4xl" />
             </button>
@@ -248,15 +139,15 @@ export default function BusPage() {
           {navigasi === "Bus" && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
-              onClick={() => {
-                setIsOpenRute(false);
-                setNavigasi("Tujuan");
-                setSelectedLocationTujuan(null);
-                setNameKabupaten(undefined);
-                setNameProvinsi(undefined);
-                setTempatSpesifik(undefined);
-                setValue("detailTujuan", null);
-              }}
+              // onClick={() => {
+              //   setIsOpenRute(false);
+              //   setNavigasi("Tujuan");
+              //   setSelectedLocationTujuan(null);
+              //   setNameKabupaten(undefined);
+              //   setNameProvinsi(undefined);
+              //   setTempatSpesifik(undefined);
+              //   setValue("detailTujuan", null);
+              // }}
             >
               <FaArrowLeft className="text-4xl" />
             </button>
@@ -266,8 +157,8 @@ export default function BusPage() {
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
                 setNavigasi("Bus");
-                setIsOpenRute(true);
-                setPopUp(false);
+                // setIsOpenRute(true);
+                // setPopUp(false);
               }}
             >
               <FaArrowLeft className="text-4xl" />
@@ -279,14 +170,15 @@ export default function BusPage() {
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
-                userFocus({ zoom: 11 });
+                if (userLocation)
+                  handleFocus({ koordinat: userLocation, zoom: 11 });
                 setProv(province);
               }}
             >
               <BiTargetLock className="text-4xl" />
             </button>
           )}
-          {navigasi === "Jemput" && !selectedLocationJemput && (
+          {/* {navigasi === "Jemput" && !selectedLocationJemput && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
@@ -295,8 +187,8 @@ export default function BusPage() {
             >
               <BiTargetLock className="text-4xl" />
             </button>
-          )}
-          {navigasi === "Jemput" && selectedLocationJemput && (
+          )} */}
+          {/* {navigasi === "Jemput" && selectedLocationJemput && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
@@ -305,8 +197,8 @@ export default function BusPage() {
             >
               <BiTargetLock className="text-4xl" />
             </button>
-          )}
-          {navigasi === "Tujuan" && !selectedLocationTujuan && (
+          )} */}
+          {/* {navigasi === "Tujuan" && !selectedLocationTujuan && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
@@ -315,8 +207,8 @@ export default function BusPage() {
             >
               <BiTargetLock className="text-4xl" />
             </button>
-          )}
-          {navigasi === "Tujuan" && selectedLocationTujuan && (
+          )} */}
+          {/* {navigasi === "Tujuan" && selectedLocationTujuan && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
@@ -325,8 +217,8 @@ export default function BusPage() {
             >
               <BiTargetLock className="text-4xl" />
             </button>
-          )}
-          {navigasi === "Bus" && selectedLocationJemput && (
+          )} */}
+          {/* {navigasi === "Bus" && selectedLocationJemput && (
             <button
               className="border-2 border-white w-fit p-1 rounded-xl bg-[#121418]"
               onClick={() => {
@@ -335,7 +227,7 @@ export default function BusPage() {
             >
               <BiTargetLock className="text-4xl" />
             </button>
-          )}
+          )} */}
         </div>
 
         {/* Isi Rute, Titik Jemput, Titik Tujuan, Pilih Bus */}
@@ -439,13 +331,13 @@ export default function BusPage() {
                     className="flex justify-end"
                     onClick={() => {
                       handleOpenRute();
-                      setKoordinatAwal(null);
+                      // setKoordinatAwal(null);
                     }}
                   >
                     <MdCancelPresentation className="text-3xl" />
                   </button>
                 </div>
-                <div className="overflow-y-auto h-[270px]">
+                {/* <div className="overflow-y-auto h-[270px]">
                   {[
                     `${ruteForUser?.[pagRute]?.from?.loc || ""} ⇨ ${
                       ruteForUser?.[pagRute]?.to?.loc || ""
@@ -496,18 +388,17 @@ export default function BusPage() {
                       )}
                     </div>
                   ))}
-                </div>
+                </div> */}
                 <div className="mt-5">
                   <button
                     type="button"
-                    className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
-                      selectedRute ? "bg-[#35F9D1] font-bold" : "bg-[#25b498]"
-                    }`}
-                    disabled={!selectedRute}
+                    // className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                    //   selectedRute ? "bg-[#35F9D1] font-bold" : "bg-[#25b498]"
+                    // }`}
+                    // disabled={!selectedRute}
                     onClick={() => {
                       setIsOpenRute(false);
                       setNavigasi("Jemput");
-                      
                     }}
                   >
                     LANJUT
@@ -539,7 +430,7 @@ export default function BusPage() {
                     className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-lg`}
                     onClick={() => {
                       handleOpenRute();
-                      handleLokasiJemput();
+                      // handleLokasiJemput();
                     }}
                   >
                     TITIK JEMPUT
@@ -563,10 +454,10 @@ export default function BusPage() {
                     className="flex justify-end"
                     onClick={() => {
                       handleOpenRute();
-                      setSelectedLocationJemput(null);
-                      setNameKabupaten(undefined);
-                      setNameProvinsi(undefined);
-                      setTempatSpesifik(undefined);
+                      // setSelectedLocationJemput(null);
+                      // setNameKabupaten(undefined);
+                      // setNameProvinsi(undefined);
+                      // setTempatSpesifik(undefined);
                     }}
                   >
                     <MdCancelPresentation className="text-3xl" />
@@ -576,59 +467,55 @@ export default function BusPage() {
                   <h1 className="text-xl">{`Kecamatan:`}</h1>
                   <select
                     className="bg-white text-black p-3 text-xl rounded-xl mt-2 appearance-none w-full"
-                    onChange={(e) => setSelectedKec(e.target.value)}
+                    // onChange={(e) => setSelectedKec(e.target.value)}
                   >
                     <option value="">Pilih Kecamatan</option>
-                    {cariNameKab?.kecamatan.map((kec, idx) => (
+                    {/* {cariNameKab?.kecamatan.map((kec, idx) => (
                       <option key={idx} value={kec.namaKec}>
                         {kec.namaKec}
                       </option>
-                    ))}
+                    ))} */}
                   </select>
                   <h1 className="mt-5 text-xl">{`Kelurahan/Desa:`}</h1>
                   <select
                     className="bg-white text-black p-3 text-xl rounded-xl mt-2 appearance-none w-full"
-                    onChange={(e) => setSelectedDesaKel(e.target.value)}
+                    // onChange={(e) => setSelectedDesaKel(e.target.value)}
                   >
                     <option value="">Pilih Kelurahan/Desa</option>
-                    {cariNameKec?.desaKel.map((desaKel, idx) => (
+                    {/* {cariNameKec?.desaKel.map((desaKel, idx) => (
                       <option key={idx} value={desaKel}>
                         {desaKel}
                       </option>
-                    ))}
+                    ))} */}
                   </select>
                   <h1 className="mt-5 text-xl">{`Tempat Spesifik:`}</h1>
                   <input
                     placeholder="Isi Nama Tempat yang Spesifik"
                     className="bg-white text-black py-3 px-5 w-full rounded-xl text-xl my-2"
-                    value={tempatSpesifik || ""}
-                    onChange={(e) => setTempatSpesifik(e.target.value)}
+                    // value={tempatSpesifik || ""}
+                    // onChange={(e) => setTempatSpesifik(e.target.value)}
                   />
                 </div>
                 <div className="mt-5">
                   <button
                     type="button"
-                    className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
-                      selectedKec && selectedDesaKel && tempatSpesifik
-                        ? "bg-[#35F9D1] font-bold"
-                        : "bg-[#25b498]"
-                    }`}
-                    disabled={
-                      !selectedKec || !selectedDesaKel || !tempatSpesifik
-                    }
+                    // className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                    //   selectedKec && selectedDesaKel && tempatSpesifik
+                    //     ? "bg-[#35F9D1] font-bold"
+                    //     : "bg-[#25b498]"
+                    // }`}
+                    // disabled={
+                    //   !selectedKec || !selectedDesaKel || !tempatSpesifik
+                    // }
                     onClick={() => {
-                      setValue(
-                        "detailJemput",
-                        `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
-                      );
+                      // setValue(
+                      //   "detailJemput",
+                      //   `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
+                      // );
                       setIsOpenRute(false);
-                      setTempatSpesifik(undefined);
+                      // setTempatSpesifik(undefined);
                       localStorage.setItem("lastNavigasi", "Tujuan");
                       setNavigasi("Tujuan");
-                      localStorage.setItem(
-                        "detailJemput",
-                        `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
-                      );
                     }}
                   >
                     LANJUT
@@ -660,7 +547,7 @@ export default function BusPage() {
                     className={`bg-[#35F9D1] text-[#1A443B] w-full py-3 font-bold text-xl rounded-lg`}
                     onClick={() => {
                       handleOpenRute();
-                      handleLokasiTujuan();
+                      // handleLokasiTujuan();
                     }}
                   >
                     TITIK TUJUAN
@@ -684,7 +571,7 @@ export default function BusPage() {
                     className="flex justify-end"
                     onClick={() => {
                       handleOpenRute();
-                      setSelectedLocationTujuan(null);
+                      // setSelectedLocationTujuan(null);
                     }}
                   >
                     <MdCancelPresentation className="text-3xl" />
@@ -694,55 +581,54 @@ export default function BusPage() {
                   <h1 className="text-xl">{`Kecamatan:`}</h1>
                   <select
                     className="bg-white text-black p-3 text-xl rounded-xl mt-2 appearance-none w-full"
-                    onChange={(e) => setSelectedKec(e.target.value)}
+                    // onChange={(e) => setSelectedKec(e.target.value)}
                   >
                     <option value="">Pilih Kecamatan</option>
-                    {cariNameKab?.kecamatan.map((kec, idx) => (
+                    {/* {cariNameKab?.kecamatan.map((kec, idx) => (
                       <option key={idx} value={kec.namaKec}>
                         {kec.namaKec}
                       </option>
-                    ))}
+                    ))} */}
                   </select>
                   <h1 className="mt-5 text-xl">{`Kelurahan/Desa:`}</h1>
                   <select
                     className="bg-white text-black p-3 text-xl rounded-xl mt-2 appearance-none w-full"
-                    onChange={(e) => setSelectedDesaKel(e.target.value)}
+                    // onChange={(e) => setSelectedDesaKel(e.target.value)}
                   >
                     <option value="">Pilih Kelurahan/Desa</option>
-                    {cariNameKec?.desaKel.map((desaKel, idx) => (
+                    {/* {cariNameKec?.desaKel.map((desaKel, idx) => (
                       <option key={idx} value={desaKel}>
                         {desaKel}
                       </option>
-                    ))}
+                    ))} */}
                   </select>
                   <h1 className="mt-5 text-xl">{`Tempat Spesifik:`}</h1>
                   <input
                     placeholder="Isi Nama Tempat yang Spesifik"
                     className="bg-white text-black py-3 px-5 w-full rounded-xl text-xl my-2"
-                    value={tempatSpesifik || ""}
-                    onChange={(e) => setTempatSpesifik(e.target.value)}
+                    // value={tempatSpesifik || ""}
+                    // onChange={(e) => setTempatSpesifik(e.target.value)}
                   />
                 </div>
                 <div className="mt-5">
                   <button
                     type="button"
-                    className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
-                      selectedKec && selectedDesaKel && tempatSpesifik
-                        ? "bg-[#35F9D1] font-bold"
-                        : "bg-[#25b498]"
-                    }`}
-                    disabled={
-                      !selectedKec || !selectedDesaKel || !tempatSpesifik
-                    }
+                    // className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                    //   selectedKec && selectedDesaKel && tempatSpesifik
+                    //     ? "bg-[#35F9D1] font-bold"
+                    //     : "bg-[#25b498]"
+                    // }`}
+                    // disabled={
+                    //   !selectedKec || !selectedDesaKel || !tempatSpesifik
+                    // }
                     onClick={() => {
-                      setValue(
-                        "detailTujuan",
-                        `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
-                      );
+                      // setValue(
+                      //   "detailTujuan",
+                      //   `${tempatSpesifik} di ${selectedDesaKel}, Kec. ${selectedKec}, Kab. ${namekabupaten}`
+                      // );
                       setIsOpenRute(false);
-                      setCookie("lastNavigasi", "Bus");
                       setNavigasi("Bus");
-                      updateLokasiBusTrue();
+                      // updateLokasiBusTrue();
                     }}
                   >
                     LANJUT
@@ -825,7 +711,7 @@ export default function BusPage() {
                     onClick={() => {
                       handleOpenRute();
                       setLayananBus(null);
-                      setSelectedPlatNomor(null);
+                      // setSelectedPlatNomor(null);
                     }}
                   >
                     <MdCancelPresentation className="text-3xl" />
@@ -834,7 +720,7 @@ export default function BusPage() {
                 {/* Isi Bus Favorit */}
                 {layananBus === "List" && (
                   <div>
-                    <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
+                    {/* <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
                       {updateListBus &&
                         (updateListBus as BusType[])
                           .filter((item) =>
@@ -895,19 +781,19 @@ export default function BusPage() {
                               )}
                             </div>
                           ))}
-                    </div>
+                    </div> */}
                     <div className="mt-4">
                       <button
                         type="button"
-                        className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
-                          selectedPlatNomor
-                            ? "bg-[#35F9D1] font-bold"
-                            : "bg-[#25b498]"
-                        }`}
-                        disabled={!selectedPlatNomor}
-                        onClick={() => {
-                          setPopUp(true);
-                        }}
+                        // className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                        //   selectedPlatNomor
+                        //     ? "bg-[#35F9D1] font-bold"
+                        //     : "bg-[#25b498]"
+                        // }`}
+                        // disabled={!selectedPlatNomor}
+                        // onClick={() => {
+                        //   setPopUp(true);
+                        // }}
                       >
                         PILIH KURSI & LANJUT
                       </button>
@@ -917,7 +803,7 @@ export default function BusPage() {
                 {/* Isi Bus Terdekat */}
                 {layananBus === "Terdekat" && (
                   <div>
-                    <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
+                    {/* <div className="flex flex-col gap-y-5 mt-3 overflow-y-auto h-[200px]">
                       {updateListBus && (
                         <div className="flex flex-col gap-2">
                           {(updateListBus as BusType[])
@@ -966,19 +852,19 @@ export default function BusPage() {
                             ))}
                         </div>
                       )}
-                    </div>
+                    </div> */}
                     <div className="mt-4">
                       <button
                         type="button"
-                        className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
-                          selectedPlatNomor
-                            ? "bg-[#35F9D1] font-bold"
-                            : "bg-[#25b498]"
-                        }`}
-                        disabled={!selectedPlatNomor}
-                        onClick={() => {
-                          setPopUp(true);
-                        }}
+                        // className={` text-[#1A443B] w-full py-3  text-xl rounded-3xl ${
+                        //   selectedPlatNomor
+                        //     ? "bg-[#35F9D1] font-bold"
+                        //     : "bg-[#25b498]"
+                        // }`}
+                        // disabled={!selectedPlatNomor}
+                        // onClick={() => {
+                        //   setPopUp(true);
+                        // }}
                       >
                         PILIH KURSI & LANJUT
                       </button>
@@ -1093,7 +979,6 @@ export default function BusPage() {
                         className={`text-[#1A443B] w-full py-3  text-xl rounded-3xl bg-[#25b498]`}
                         onClick={() => {
                           setIsOpenRute(true);
-                          setCookie("lastNavigasi", "Bayar");
                           setNavigasi("Bayar");
                         }}
                       >
@@ -1110,7 +995,7 @@ export default function BusPage() {
             <div className={`${isOpenRute ? "block" : "hidden"}`}>
               <h1 className="text-center text-xl mb-5">DETAIL PEMBAYARAN</h1>
               <div className="overflow-y-auto h-[350px] border p-2 rounded-xl">
-                <p className="pb-2">RUTE: {selectedRute}</p>
+                <p className="pb-2">RUTE:</p>
                 <p className="pb-2">Lokasi Jemput: {watch("detailJemput")}</p>
                 <p className="pb-2">Lokasi Tujuan: {watch("detailTujuan")}</p>
                 <p className="pb-2">
@@ -1135,18 +1020,11 @@ export default function BusPage() {
           )}
         </form>
       </div>
-
-      {/* Tampilkan Map */}
-      <div
-        id="map"
-        style={{
-          width: "100%",
-          height: "100vh",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          zIndex: -1,
-        }}
+      <DynamicMap
+        mapRef={mapRef}
+        routingRef={routingRef}
+        from={ruteForUser[0].from}
+        to={ruteForUser[0].to}
       />
     </div>
   );

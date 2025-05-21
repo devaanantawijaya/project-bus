@@ -3,7 +3,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import { setToLocalStorage } from "@/utils/localStorage";
 
 interface IUseMaps {
   center: { lat: number; lng: number };
@@ -197,11 +196,9 @@ export default function UseMap({
       const location = {
         lat: getLokasiJemput.lat,
         lng: getLokasiJemput.lng,
-      }
+      };
 
       setSelectedLocationJemput(location); // Simpan lokasi saat tombol ditekan
-
-      setToLocalStorage("titikJemput", location);
 
       // Update posisi marker ke lokasi yang dipilih
       if (markerRef.current) {
