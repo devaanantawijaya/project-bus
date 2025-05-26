@@ -79,7 +79,7 @@ export default function MapView({
         <RoutingMachine from={from} to={to} routingRef={routingRef} />
       </MapContainer>
       {(navigasi === "Jemput" || navigasi === "Tujuan") && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-[1000] pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-10 pointer-events-none">
           <img
             src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png"
             alt="marker"
