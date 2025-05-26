@@ -23,6 +23,7 @@ const RoutingMachine = ({
         missingRouteTolerance: 0,
       },
       routeWhileDragging: false,
+      fitSelectedRoutes: false,
       show: false,
       addWaypoints: false,
       // @ts-expect-error, "createMarker" does not exist in type "RoutingConstrolOptions"

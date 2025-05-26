@@ -14,6 +14,8 @@ interface IMapView {
   routingRef: React.MutableRefObject<L.Routing.Control | null>;
   from: { lat: number; lng: number };
   to: { lat: number; lng: number };
+  navigasi: "Rute" | "Jemput" | "Tujuan" | "Bus" | "Bayar" | null;
+  titikJemput: { lat: number; lng: number } | null;
 }
 
 const redIcon = new L.Icon({
@@ -27,7 +29,14 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-export default function MapView({ mapRef, routingRef, from, to }: IMapView) {
+export default function MapView({
+  mapRef,
+  routingRef,
+  navigasi,
+  from,
+  to,
+  titikJemput,
+}: IMapView) {
   const { userLocation } = useUserLocationV2();
   if (!userLocation) return null;
 
@@ -41,29 +50,43 @@ export default function MapView({ mapRef, routingRef, from, to }: IMapView) {
   }
 
   return (
-    <MapContainer
-      className="z-0"
-      style={{ height: "100vh", width: "100%" }}
-      center={[userLocation.lat, userLocation.lng]}
-      zoom={11}
-      scrollWheelZoom={true}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {userLocation && (
-        <Marker position={[userLocation.lat, userLocation.lng]} icon={redIcon}>
-          <Popup>Kamu Disini</Popup>
-        </Marker>
+    <div className="relative h-screen w-full">
+      <MapContainer
+        className="z-0"
+        style={{ height: "100vh", width: "100%" }}
+        center={[userLocation.lat, userLocation.lng]}
+        zoom={11}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {navigasi === "Rute" && userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            icon={redIcon}
+          >
+            <Popup>Kamu Disini</Popup>
+          </Marker>
+        )}
+        {navigasi === "Bus" && titikJemput && (
+          <Marker position={[titikJemput.lat, titikJemput.lng]} icon={redIcon}>
+            <Popup>Kamu Disini</Popup>
+          </Marker>
+        )}
+        <MyMapController />
+        <RoutingMachine from={from} to={to} routingRef={routingRef} />
+      </MapContainer>
+      {(navigasi === "Jemput" || navigasi === "Tujuan") && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-[1000] pointer-events-none">
+          <img
+            src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png"
+            alt="marker"
+            className="w-[25px] h-[41px]"
+          />
+        </div>
       )}
-      <MyMapController />
-      <RoutingMachine
-        from={from}
-        to={to}
-        routingRef={routingRef}
-       
-      />
-    </MapContainer>
+    </div>
   );
 }

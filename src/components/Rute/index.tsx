@@ -29,15 +29,13 @@ export default function Rute({
               setPagRute(0);
             }}
           >
-            <option disabled selected>
-              Pilih Provinsi
-            </option>
+            <option disabled>Pilih Provinsi</option>
             <option value="Bali">Bali</option>
             <option value="Jawa Timur">Jawa Timur</option>
           </select>
         )}
 
-        {(navigasi === "Jemput" || navigasi === "Tujuan") && selectedRute && (
+        {(navigasi !== "Rute") && selectedRute && (
           <div className="bg-[#121418] py-1 px-3 rounded-lg border-2 border-white">
             {selectedRute}
           </div>

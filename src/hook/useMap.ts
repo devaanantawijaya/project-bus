@@ -331,57 +331,6 @@ export default function UseMap({
     }
   }, [navigasi, selectedLocationJemput]);
 
-  // true false lokasi list bus
-  // const updateLokasiBusTrue = () => {
-  //   if (mapRef.current && koordinatAwal && selectedLocationJemput) {
-  //     const routing = L.Routing.osrmv1(); // Engine routing default
-
-  //     routing.route(
-  //       [
-  //         L.Routing.waypoint(L.latLng(koordinatAwal.lat, koordinatAwal.lng)),
-  //         L.Routing.waypoint(
-  //           L.latLng(selectedLocationJemput.lat, selectedLocationJemput.lng)
-  //         ),
-  //       ],
-  //       (err, routes) => {
-  //         if (!err && routes && routes.length > 0) {
-  //           const routeCoords = routes[0].coordinates;
-
-  //           const updatedBus = listBus.map((bus) => ({
-  //             ...bus,
-  //             platBus: bus.platBus.map((plat) => {
-  //               const isTrue = isNearRoute(routeCoords, plat.lokasiBus, 100);
-  //               return {
-  //                 ...plat,
-  //                 lokasiBusTrue: isTrue,
-  //               };
-  //             }),
-  //           }));
-
-  //           setUpdateListBus(updatedBus);
-  //         } else {
-  //           console.error("❌ Gagal menghitung rute:", err);
-  //         }
-  //       }
-  //     );
-  //   } else {
-  //     console.warn("❌ Ada data yang belum tersedia:", {
-  //       mapRef: mapRef.current,
-  //       koordinatAwal,
-  //       selectedLocationJemput,
-  //     });
-  //   }
-
-  //   const isNearRoute = (routeCoords, checkLatLng, maxDistanceMeters = 100) => {
-  //     return routeCoords.some((point) => {
-  //       const dist = L.latLng(point.lat, point.lng).distanceTo(
-  //         L.latLng(checkLatLng.lat, checkLatLng.lng)
-  //       );
-  //       return dist <= maxDistanceMeters;
-  //     });
-  //   };
-  // };
-
   const updateLokasiBusTrue = () => {
     if (mapRef.current && koordinatAwal && selectedLocationJemput) {
       const routing = L.Routing.osrmv1();

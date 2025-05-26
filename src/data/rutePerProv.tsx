@@ -38,8 +38,8 @@ export const RutePerProvinsi: IProvinsi[] = [
           lng: 115.206792,
         },
         center: {
-          lat: -8.356987,
-          lng: 114.620484,
+          lat: -8.426359, 
+          lng: 114.830094,
         },
       },
       {

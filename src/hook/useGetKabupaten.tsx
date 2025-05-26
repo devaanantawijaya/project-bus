@@ -31,7 +31,7 @@ interface IPlace {
   boundingbox: [string, string, string, string];
 }
 
-export default function UseGetProvKab(
+export default function useGetProvKab(
   selectedLocation: { lat: number; lng: number } | null
 ) {
   const [namekabupaten, setNameKabupaten] = useState<string | undefined>(
