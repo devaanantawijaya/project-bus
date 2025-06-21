@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "namaDepan": "Budi",
+      "namaBelakang": "Awan",
+      "email": "budiawan@gmail.com",
+      "nomorHpWa": "081XXXXXXXXX",
+      "role": "penumpang",
+      "tiket": [
+        {
+          "tanggalPemesanan": "24-06-2025",
+          "statusPembayaran": "Sudah Bayar",
+          "rute": "GILIMANUK ⇨ DENPASAR",
+          "titikJemput": { "lat": -8.357022, "lng": 114.62071 },
+          "detailJemput": "Depan Hotel di Baler Bale Agung, Kec. Negara, Kab. Jembrana",
+          "titikTujuan": { "lat": -8.426359, "lng": 114.830094 },
+          "detailTujuan": "Depan Warung di Pohsanten, Kec. Mendoyo, Kab. Jembrana",
+          "nama_bus": "Bahagia",
+          "platNomor": "DK 1111 WA",
+          "jenisBus": "medium+",
+          "nomorKursi": "3",
+          "tarifBusPerKM": 400,
+          "jarakTempuhKM": 25,
+          "feePelayanan": 1000,
+          "totalHarga": 11000
+        },
+        {
+          "tanggalPemesanan": "20-06-2025",
+          "statusPembayaran": "Sudah Bayar",
+          "rute": "GILIMANUK ⇨ DENPASAR",
+          "titikJemput": { "lat": -8.357022, "lng": 114.62071 },
+          "detailJemput": "Depan Hotel di Baler Bale Agung, Kec. Negara, Kab. Jembrana",
+          "titikTujuan": { "lat": -8.426359, "lng": 114.830094 },
+          "detailTujuan": "Depan Warung di Pohsanten, Kec. Mendoyo, Kab. Jembrana",
+          "nama_bus": "Putra Samudra",
+          "platNomor": "DK 1111 ZZ",
+          "jenisBus": "medium+",
+          "nomorKursi": "3",
+          "tarifBusPerKM": 400,
+          "jarakTempuhKM": 25,
+          "feePelayanan": 1000,
+          "totalHarga": 11000
+        }
+      ]
+    }
+  ],
+  "status": "success"
+}

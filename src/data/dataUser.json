@@ -1,0 +1,50 @@
+{
+  "data": [
+    {
+      "namaDepan": "Budi",
+      "namaBelakang": "Awan",
+      "email": "budiawan@gmail.com",
+      "nomorHpWa": "081XXXXXXXXX",
+      "role": "penumpang",
+      "tiket": [
+        {
+          "tanggalPemesanan": "21-06-2025",
+          "statusPembayaran": "Sudah Bayar",
+          "rute": "DENPASAR ⇨ GILIMANUK",
+          "titikJemput": { "lat": -8.5453331, "lng": 115.115048 },
+          "detailJemput": "Depan Hotel di Pitra, Kec. Penebel, Kab. Tabanan",
+          "titikTujuan": { "lat": -8.426359, "lng": 114.830094 },
+          "detailTujuan": "Depan Warung di Pohsanten, Kec. Mendoyo, Kab. Jembrana",
+          "nama_bus": "Yusa",
+          "platNomor": "DK 1324 WA",
+          "jenisBus": "medium",
+          "nomorKursi": "3",
+          "tarifBusPerKM": 400,
+          "jarakTempuhKM": 34,
+          "feePelayanan": 1000,
+          "totalHarga": 14600,
+          "lewatTgl": false
+        },
+        {
+          "tanggalPemesanan": "20-06-2025",
+          "statusPembayaran": "Sudah Bayar",
+          "rute": "DENPASAR ⇨ GILIMANUK",
+          "titikJemput": { "lat": -8.5453331, "lng": 115.115048 },
+          "detailJemput": "Depan Hotel di Pitra, Kec. Penebel, Kab. Tabanan",
+          "titikTujuan": { "lat": -8.426359, "lng": 114.830094 },
+          "detailTujuan": "Depan Warung di Pohsanten, Kec. Mendoyo, Kab. Jembrana",
+          "nama_bus": "Dharma",
+          "platNomor": "DK 1122 WA",
+          "jenisBus": "medium+",
+          "nomorKursi": "5",
+          "tarifBusPerKM": 400,
+          "jarakTempuhKM": 34,
+          "feePelayanan": 1000,
+          "totalHarga": 14600,
+          "lewatTgl": true
+        }
+      ]
+    }
+  ],
+  "status": "success"
+}

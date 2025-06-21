@@ -6,23 +6,24 @@ import { HiMiniTicket } from "react-icons/hi2";
 import { RiDiscountPercentFill } from "react-icons/ri";
 import { MdAccountCircle } from "react-icons/md";
 
-export default function NavbarDashboard() {
-  const [isSelectedNav, setIsSelectedNav] = useState<
-    "home" | "tiketku" | "promo" | "akun"
-  >("home");
-
-  const handleIsSelectedNav = (
-    select: "home" | "tiketku" | "promo" | "akun"
-  ) => {
-    setIsSelectedNav(select);
-  };
-
+export default function NavbarDashboard({
+  isSelectedNav,
+  setIsSelectedNav,
+  setFlippedIndex,
+}: {
+  isSelectedNav: "home" | "tiketku" | "promo" | "akun";
+  setIsSelectedNav: (value: "home" | "tiketku" | "promo" | "akun") => void;
+  setFlippedIndex: (value: number | null) => void;
+}) {
   return (
     <div className="fixed bottom-0 w-full flex items-center justify-between px-5 py-5 shadow-2xl shadow-white bg-black">
       {/* home */}
       <button
         className="flex flex-col justify-center items-center gap-y-1"
-        onClick={() => handleIsSelectedNav("home")}
+        onClick={() => {
+          setIsSelectedNav("home");
+          setFlippedIndex(null);
+        }}
       >
         <div
           className={`${
@@ -43,7 +44,10 @@ export default function NavbarDashboard() {
       {/* tiketku */}
       <button
         className="flex flex-col justify-center items-center gap-y-1"
-        onClick={() => handleIsSelectedNav("tiketku")}
+        onClick={() => {
+          setIsSelectedNav("tiketku");
+          setFlippedIndex(null);
+        }}
       >
         <div
           className={`${
@@ -64,7 +68,10 @@ export default function NavbarDashboard() {
       {/* promo */}
       <button
         className="flex flex-col justify-center items-center gap-y-1"
-        onClick={() => handleIsSelectedNav("promo")}
+        onClick={() => {
+          setIsSelectedNav("promo");
+          setFlippedIndex(null);
+        }}
       >
         <div
           className={`${
@@ -85,7 +92,10 @@ export default function NavbarDashboard() {
       {/* akun */}
       <button
         className="flex flex-col justify-center items-center gap-y-1"
-        onClick={() => handleIsSelectedNav("akun")}
+        onClick={() => {
+          setIsSelectedNav("akun");
+          setFlippedIndex(null);
+        }}
       >
         <div
           className={`${

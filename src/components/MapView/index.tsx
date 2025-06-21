@@ -70,7 +70,7 @@ export default function MapView({
             <Popup>Kamu Disini</Popup>
           </Marker>
         )}
-        {navigasi === "Bus" && titikJemput && (
+        {(navigasi === "Bus" || navigasi === "Bayar") && titikJemput && (
           <Marker position={[titikJemput.lat, titikJemput.lng]} icon={redIcon}>
             <Popup>Kamu Disini</Popup>
           </Marker>
