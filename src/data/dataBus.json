@@ -14,7 +14,7 @@
           },
           "platNomor": "DK 1111 WA",
           "koordinat": { "lat": -8.354143, "lng": 114.606607 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -44,7 +44,7 @@
           },
           "platNomor": "DK 2222 WA",
           "koordinat": { "lat": -8.347312, "lng": 114.575473 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -74,7 +74,7 @@
           },
           "platNomor": "DK 3333 WA",
           "koordinat": { "lat": -8.334739, "lng": 114.55364 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -104,7 +104,7 @@
           },
           "platNomor": "DK 4444 WA",
           "koordinat": { "lat": -8.330415, "lng": 114.548253 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -131,7 +131,7 @@
           },
           "platNomor": "DK 5555 WA",
           "koordinat": { "lat": -8.312851, "lng": 114.526217 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -218,7 +218,7 @@
         }
       ],
       "booking": {
-        "19-06-2025": {
+        "24-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -242,7 +242,7 @@
             }
           }
         },
-        "20-06-2025": {
+        "25-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -266,7 +266,7 @@
             }
           }
         },
-        "21-06-2025": {
+        "26-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -306,7 +306,7 @@
           },
           "platNomor": "DK 1111 ZZ",
           "koordinat": { "lat": -8.376518, "lng": 114.682967 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -336,7 +336,7 @@
           },
           "platNomor": "DK 2222 ZZ",
           "koordinat": { "lat": -8.35761, "lng": 114.633432 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -366,7 +366,7 @@
           },
           "platNomor": "DK 3333 ZZ",
           "koordinat": { "lat": -8.350966, "lng": 114.59637 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -396,7 +396,7 @@
           },
           "platNomor": "DK 4444 ZZ",
           "koordinat": { "lat": -8.337702, "lng": 114.559656 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -423,7 +423,7 @@
           },
           "platNomor": "DK 5555 ZZ",
           "koordinat": { "lat": -8.320423, "lng": 114.531192 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "GILIMANUK ⇨ DENPASAR",
@@ -510,7 +510,7 @@
         }
       ],
       "booking": {
-        "19-06-2025": {
+        "24-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -534,7 +534,7 @@
             }
           }
         },
-        "20-06-2025": {
+        "25-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -558,7 +558,7 @@
             }
           }
         },
-        "21-06-2025": {
+        "26-06-2025": {
           "medium+_31": {
             "GILIMANUK ⇨ DENPASAR": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -598,7 +598,7 @@
           },
           "platNomor": "DK 1122 WA",
           "koordinat": { "lat": -8.528371, "lng": 114.997115 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -627,7 +627,7 @@
           },
           "platNomor": "DK 3344 WA",
           "koordinat": { "lat": -8.497942, "lng": 115.019657 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -656,7 +656,7 @@
           },
           "platNomor": "DK 5566 WA",
           "koordinat": { "lat": -8.505081, "lng": 115.071728 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -685,7 +685,7 @@
           },
           "platNomor": "DK 7788 WA",
           "koordinat": { "lat": -8.576263, "lng": 115.178251 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -712,7 +712,7 @@
           },
           "platNomor": "DK 9900 WA",
           "koordinat": { "lat": -8.63263, "lng": 115.206406 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -798,7 +798,7 @@
         }
       ],
       "booking": {
-        "19-06-2025": {
+        "24-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -822,7 +822,7 @@
             }
           }
         },
-        "20-06-2025": {
+        "25-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -846,7 +846,7 @@
             }
           }
         },
-        "21-06-2025": {
+        "26-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "06:00": [1, 2, 3, 7, 12, 17],
@@ -886,7 +886,7 @@
           },
           "platNomor": "DK 1234 WA",
           "koordinat": { "lat": -8.485232, "lng": 114.944975 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -915,7 +915,7 @@
           },
           "platNomor": "DK 3456 WA",
           "koordinat": { "lat": -8.501489, "lng": 115.024794 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -944,7 +944,7 @@
           },
           "platNomor": "DK 7890 WA",
           "koordinat": { "lat": -8.52118, "lng": 115.096808 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -973,7 +973,7 @@
           },
           "platNomor": "DK 1324 WA",
           "koordinat": { "lat": -8.563232, "lng": 115.16702 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -1000,7 +1000,7 @@
           },
           "platNomor": "DK 5768 WA",
           "koordinat": { "lat": -8.617013, "lng": 115.194973 },
-          "tanggal": "19-06-2025",
+          "tanggal": "24-06-2025",
           "keberangkatan": [
             {
               "IsiRute": "DENPASAR ⇨ GILIMANUK",
@@ -1086,7 +1086,7 @@
         }
       ],
       "booking": {
-        "19-06-2025": {
+        "24-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "05:00": [1, 2, 3, 7, 12, 17],
@@ -1110,7 +1110,7 @@
             }
           }
         },
-        "20-06-2025": {
+        "25-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "05:00": [1, 2, 3, 7, 12, 17],
@@ -1134,7 +1134,7 @@
             }
           }
         },
-        "21-06-2025": {
+        "26-06-2025": {
           "medium+_26": {
             "DENPASAR ⇨ GILIMANUK": {
               "05:00": [1, 2, 3, 7, 12, 17],
