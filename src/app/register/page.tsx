@@ -1,33 +1,61 @@
 "use client";
 
 import InputForm from "@/components/InputForm";
-import React from "react";
+import React, { useState } from "react";
 import { MdEmail } from "react-icons/md";
 import { IoMdPerson } from "react-icons/io";
 import { useForm } from "react-hook-form";
 import { MdLocalPhone } from "react-icons/md";
 import { IoIosLock } from "react-icons/io";
+import axios from "axios";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface TForm {
-  name: string;
-  phone: string;
-  email: string;
-  password: string;
-}
+const schema = z.object({
+  name: z.string().min(1, "Nama wajib diisi"),
+  password: z.string().min(1, "Password wajib diisi"),
+  email: z.string().min(1, "Email wajib diisi").email(),
+  phone: z
+    .string()
+    .min(1, "Phone wajib diisi")
+    .max(12, "Nomor Maksimun 12 angka"),
+});
+
+export type TRegister = z.infer<typeof schema>;
 
 export default function RegisterPage() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TForm>();
+  } = useForm<TRegister>({
+    resolver: zodResolver(schema),
+  });
+  const [user, setUser] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const handleForm = (data: TForm) => {
-    console.log("name:", data.name);
-    console.log("phone:", data.phone);
-    console.log("email:", data.email);
-    console.log("password:", data.password);
-    alert("Berhasil Register");
+  const handleForm = async (data: TRegister) => {
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/register", {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+      });
+
+      axios.put("", {}, {
+        headers: {
+          Authorization: localStorage.get('Token')
+        }
+      })
+      setUser(res.data);
+      console.log(user);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   console.log("error:", errors);
@@ -47,12 +75,7 @@ export default function RegisterPage() {
           {/* Input Name */}
           <div className="pb-5">
             <InputForm
-              {...register("name", {
-                required: {
-                  message: "Name Kosong",
-                  value: true,
-                },
-              })}
+              {...register("name")}
               title="Name"
               logo={<IoMdPerson className="text-[#1A443B] text-xl" />}
               className="py-3.5 px-4"
@@ -63,12 +86,7 @@ export default function RegisterPage() {
           {/* Input Phone */}
           <div className="pb-5">
             <InputForm
-              {...register("phone", {
-                required: {
-                  message: "Phone Kosong",
-                  value: true,
-                },
-              })}
+              {...register("phone")}
               title="Phone"
               logo={<MdLocalPhone className="text-[#1A443B] text-xl" />}
               className="py-3.5 px-4"
@@ -79,12 +97,7 @@ export default function RegisterPage() {
           {/* Input Email */}
           <div className="pb-5">
             <InputForm
-              {...register("email", {
-                required: {
-                  message: "Email Kosong",
-                  value: true,
-                },
-              })}
+              {...register("email")}
               title="Email"
               logo={<MdEmail className="text-[#1A443B] text-xl" />}
               className="py-3.5 px-4"
@@ -95,12 +108,7 @@ export default function RegisterPage() {
           {/* Input Password */}
           <div className="pb-10">
             <InputForm
-              {...register("password", {
-                required: {
-                  message: "Password Kosong",
-                  value: true,
-                },
-              })}
+              {...register("password")}
               title="Password"
               logo={<IoIosLock className="text-[#1A443B] text-2xl" />}
               className="py-3 px-3.5"
@@ -122,7 +130,10 @@ export default function RegisterPage() {
         <div className="pb-10">
           <button
             type="submit"
-            className="w-full bg-[#35F9D1] font-semibold text-[#1A443B] py-3 rounded-xl"
+            className={`w-full bg-[#35F9D1] font-semibold text-[#1A443B] py-3 rounded-xl ${
+              loading && "opacity-50"
+            }`}
+            disabled={loading}
           >
             Register
           </button>
